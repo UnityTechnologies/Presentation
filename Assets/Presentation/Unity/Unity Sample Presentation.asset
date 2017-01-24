@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20d36f140d93042978901db40338cdc8, type: 3}
-  m_Name: Presentation
+  m_Name: Unity Sample Presentation
   m_EditorClassIdentifier: 
   Slides:
   - Scene: {fileID: 102900000, guid: 19257c4d45b394bc0b076ab495cd8257, type: 3}
