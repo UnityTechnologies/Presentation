@@ -30,6 +30,13 @@ namespace Unity.Presentation
 			ExitBeforeStop
 		}
 
+		private enum PresentationState
+		{
+			Default,
+
+			LoadingScene
+		}
+
 		private const string PRESENTATION_SCENE = "Scenes/PresentationLoader.unity";
 
 		#endregion
@@ -75,7 +82,7 @@ namespace Unity.Presentation
 
 		public bool IsBusy
 		{
-			get { return loadingScene == true || playModeChangeReason != PlayModeChange.User; }
+			get { return state != PresentationState.Default || playModeChangeReason != PlayModeChange.User; }
 		}
 
 		public bool IsPresenting
@@ -111,8 +118,10 @@ namespace Unity.Presentation
 		private Properties props;
 
 		private int startFrom = 0;
-		private bool loadingScene = false;
+		private PresentationState state = PresentationState.Default;
 		private PlayModeChange playModeChangeReason = PlayModeChange.User;
+		private PresentationHelper helper;
+		private int newSceneIndex;
 
 		#endregion
 
@@ -238,23 +247,11 @@ namespace Unity.Presentation
 			if (i < 0 || i >= deck.Slides.Count || i == currentSlideId) return;
 
 			var newSlide = deck.Slides[i];
-			if (!newSlide.Visible)
+			if (!newSlide.Visible || string.IsNullOrEmpty(newSlide.ScenePath))
 			{
 				if (i > currentSlideId) gotoSlide(i + 1);
 				else gotoSlide(i - 1);
 				return;
-			}
-
-			if (EditorApplication.isPlaying == true && newSlide.StartInPlayMode == true)
-			{
-				// Unload all scenes except the first one
-				var count = SceneManager.sceneCount;
-				SceneManager.SetActiveScene(SceneManager.GetSceneAt(0));
-				for (var j = count-1; j >= 1 ; j--) 
-				{
-					var scene = SceneManager.GetSceneAt(j);
-					SceneManager.UnloadSceneAsync(scene);
-				}
 			}
 
 			currentSlideId = i;
@@ -265,7 +262,8 @@ namespace Unity.Presentation
 				if (wasInPlayMode) changeSlide(); 
 				else 
 				{
-					createLoadingScene();
+					// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
+					EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
 					changePlayMode(true, PlayModeChange.SlideChangedPlayMode);
 				}
 			} 
@@ -289,14 +287,13 @@ namespace Unity.Presentation
 				{
 					try 
 					{
-						SceneManager.sceneLoaded += sceneLoadedHandler;
-						loadingScene = true;
+						state = PresentationState.LoadingScene;
+						newSceneIndex = SceneManager.sceneCount;
 						SceneManager.LoadSceneAsync(newScene, LoadSceneMode.Additive);
 					} 
 					catch
 					{
-						SceneManager.sceneLoaded -= sceneLoadedHandler;
-						loadingScene = false;
+						state = PresentationState.Default;
 					}
 				} 
 				else 
@@ -330,16 +327,6 @@ namespace Unity.Presentation
 #endif
 		}
 
-		private void updateSceneHelper()
-		{
-			var helper = GameObject.FindObjectOfType<PresentationHelper>();
-			if (!helper) return;
-			helper.NextSlide = props.NextSlide;
-			helper.PreviousSlide = props.PreviousSlide;
-			helper.Previous += previousSlideHandler;
-			helper.Next += nextSlideHandler;
-		}
-
 		private void saveEditorState()
 		{
 #if UNITY_EDITOR
@@ -350,11 +337,6 @@ namespace Unity.Presentation
 		private void restoreEditorState()
 		{
 			if (defaultSceneSetup != null && defaultSceneSetup.Length > 0) EditorSceneManager.RestoreSceneManagerSetup(defaultSceneSetup);
-		}
-
-		private void createLoadingScene()
-		{
-			EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
 		}
 
 		private void playmodeChangeHandler()
@@ -388,7 +370,7 @@ namespace Unity.Presentation
 				// Went into Play Mode
 				if (playModeChangeReason == PlayModeChange.SlideChangedPlayMode)
 				{
-					updateSceneHelper();
+					createSceneHelper();
 					changeSlide();
 				}
 				playModeChangeReason = PlayModeChange.User;
@@ -398,10 +380,26 @@ namespace Unity.Presentation
 				// Going into Play Mode
 				if (playModeChangeReason == PlayModeChange.User)
 				{
-					createLoadingScene();
 					changePlayMode(true, PlayModeChange.SlideChangedPlayMode);
 				}
 			}
+		}
+
+		private void createSceneHelper()
+		{
+			var go = new GameObject();
+			helper = go.AddComponent<PresentationHelper>();
+			helper.Frame += frameHandler;
+			helper.NextSlide = props.NextSlide;
+			helper.PreviousSlide = props.PreviousSlide;
+			helper.Previous += previousSlideHandler;
+			helper.Next += nextSlideHandler;
+		}
+
+		private void destroySceneHelper()
+		{
+			if (helper == null) return;
+			Destroy(helper.gameObject);
 		}
 
 		#endregion
@@ -418,12 +416,24 @@ namespace Unity.Presentation
 			gotoSlide(currentSlideId+1);
 		}
 
-		private void sceneLoadedHandler(Scene s, LoadSceneMode m) 
+		private void frameHandler(object sender, EventArgs e)
 		{
-			if (s.path == deck.Slides[currentSlideId].ScenePath) 
+			if (state == PresentationState.LoadingScene)
 			{
-				SceneManager.sceneLoaded -= sceneLoadedHandler;
-				loadingScene = false;
+				var scene = SceneManager.GetSceneAt(newSceneIndex);
+				if (scene.isLoaded)
+				{
+					state = PresentationState.Default;
+
+					SceneManager.SetActiveScene(scene);
+					for (var i = 0; i < newSceneIndex ; i++) 
+					{
+						var s = SceneManager.GetSceneAt(0);
+						SceneManager.UnloadSceneAsync(s);
+					}
+
+					createSceneHelper();
+				}
 			}
 		}
 
