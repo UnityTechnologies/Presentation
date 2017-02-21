@@ -262,8 +262,7 @@ namespace Unity.Presentation
 				if (wasInPlayMode) changeSlide(); 
 				else 
 				{
-					// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
-					EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
+					openEmptyScene();
 					changePlayMode(true, PlayModeChange.SlideChangedPlayMode);
 				}
 			} 
@@ -298,7 +297,9 @@ namespace Unity.Presentation
 				} 
 				else 
 				{
+					destroySceneHelper();
 					EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
+					createSceneHelper();
 				}
 
 				if (SlideChanged != null) SlideChanged(this, new SlideEventArgs(currentSlideId));
@@ -344,6 +345,7 @@ namespace Unity.Presentation
 			if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
 			{
 				// Went out of Play Mode
+				destroySceneHelper();
 				switch (playModeChangeReason)
 				{
 					case PlayModeChange.ExitBeforeStart:
@@ -357,10 +359,9 @@ namespace Unity.Presentation
 						break;
 					case PlayModeChange.User:
 						var newScene = deck.Slides[currentSlideId].ScenePath;
-						if (string.IsNullOrEmpty(newScene))
-							restoreEditorState();
-						else
-							EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
+						if (string.IsNullOrEmpty(newScene)) restoreEditorState();
+						else EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
+						createSceneHelper();
 						break;
 				}
 				playModeChangeReason = PlayModeChange.User;
@@ -378,16 +379,26 @@ namespace Unity.Presentation
 			else if (!EditorApplication.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
 			{
 				// Going into Play Mode
+				destroySceneHelper();
 				if (playModeChangeReason == PlayModeChange.User)
 				{
+					openEmptyScene();
 					changePlayMode(true, PlayModeChange.SlideChangedPlayMode);
 				}
 			}
 		}
 
+		private void openEmptyScene()
+		{
+			// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
+			EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
+		}
+
 		private void createSceneHelper()
 		{
 			var go = new GameObject();
+			go.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor | HideFlags.HideInHierarchy;
+
 			helper = go.AddComponent<PresentationHelper>();
 			helper.Frame += frameHandler;
 			helper.NextSlide = props.NextSlide;
@@ -399,7 +410,15 @@ namespace Unity.Presentation
 		private void destroySceneHelper()
 		{
 			if (helper == null) return;
-			Destroy(helper.gameObject);
+
+			if (Application.isPlaying) 
+			{
+				Destroy(helper.gameObject);
+			} else 
+			{
+				DestroyImmediate(helper.gameObject);
+			}
+			helper = null;
 		}
 
 		#endregion
@@ -426,6 +445,7 @@ namespace Unity.Presentation
 					state = PresentationState.Default;
 
 					SceneManager.SetActiveScene(scene);
+					destroySceneHelper();
 					for (var i = 0; i < newSceneIndex ; i++) 
 					{
 						var s = SceneManager.GetSceneAt(0);
