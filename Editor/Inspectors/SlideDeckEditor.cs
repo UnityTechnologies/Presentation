@@ -21,9 +21,9 @@ namespace Unity.Presentation.Inspectors
 			public readonly Color INACTIVE_COLOR = new Color(1, 1, 1, .2f);
 			public readonly Color INVISIBLE_COLOR = new Color(0, 0, 0, .3f);
 
-			public readonly GUIContent VISIBLE_ICON  = EditorGUIUtility.IconContent("animationvisibilitytoggleon");
-			public readonly GUIContent PLAYMODE_ICON  = EditorGUIUtility.IconContent("PlayButton");
-			public readonly GUIContent PLAY_ICON  = EditorGUIUtility.IconContent("PlayButton");
+			public readonly GUIContent VISIBLE_ICON  = new GUIContent(EditorGUIUtility.IconContent("animationvisibilitytoggleon"));
+			public readonly GUIContent PLAYMODE_ICON  = new GUIContent(EditorGUIUtility.IconContent("PlayButton"));
+			public readonly GUIContent PLAY_ICON  = new GUIContent(EditorGUIUtility.IconContent("PlayButton"));
 
 			public readonly GUIStyle ICON = new GUIStyle();
 			public readonly GUIStyle BG = new GUIStyle ("RL Element");
