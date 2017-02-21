@@ -15,6 +15,7 @@ public class TextGradientVertexColoring : BaseMeshEffect
 		{
 			vh.GetUIVertexStream(vertices);
 			int count = vertices.Count;
+			if (count == 0) return;
 			float rightY = vertices[0].position.x;
 			float leftY = vertices[0].position.x;
 
