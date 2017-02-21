@@ -123,6 +123,8 @@ namespace Unity.Presentation
 		private PresentationHelper helper;
 		private int newSceneIndex;
 
+		private Ticker gameViewTicker;
+
 		#endregion
 
 		#region Public API
@@ -158,6 +160,7 @@ namespace Unity.Presentation
 		public void StartPresentation(int slide = 0)
 		{
 #if UNITY_EDITOR
+			EditorApplication.update += updateHandler;
 			EditorApplication.playmodeStateChanged += playmodeChangeHandler;
 
 			// Exit Play mode first
@@ -179,7 +182,11 @@ namespace Unity.Presentation
 			if (EditorApplication.isPlaying)
 				changePlayMode(false, PlayModeChange.ExitBeforeStop);
 			else
+			{
+				destroySceneHelper();
+				clearPresentationState();
 				restoreEditorState();
+			}
 		}
 
 		public void NextSlide()
@@ -205,9 +212,16 @@ namespace Unity.Presentation
 		private void OnEnable()
 		{
 			props = Properties.Instance;
+			gameViewTicker = new Ticker(0.5f, () => {
+				var cam = Camera.main;
+				if (cam == null) return; // fails when going to Play Mode
+				cam.transform.Translate(0.1f, 0, 0);
+				cam.transform.Translate(-0.1f, 0, 0);
+			});
 
 			if (isPresenting) 
 			{
+				EditorApplication.update += updateHandler;
 				EditorApplication.playmodeStateChanged += playmodeChangeHandler;
 			}
 		}
@@ -340,6 +354,59 @@ namespace Unity.Presentation
 			if (defaultSceneSetup != null && defaultSceneSetup.Length > 0) EditorSceneManager.RestoreSceneManagerSetup(defaultSceneSetup);
 		}
 
+		private void openEmptyScene()
+		{
+			// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
+			EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
+		}
+
+		private void createSceneHelper()
+		{
+			var go = new GameObject();
+			go.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor;// | HideFlags.HideInHierarchy;
+
+			helper = go.AddComponent<PresentationHelper>();
+			helper.Frame += frameHandler;
+			helper.NextSlide = props.NextSlide;
+			helper.PreviousSlide = props.PreviousSlide;
+			helper.Previous += previousSlideHandler;
+			helper.Next += nextSlideHandler;
+		}
+
+		private void destroySceneHelper()
+		{
+			if (helper == null) return;
+
+			if (Application.isPlaying) 
+			{
+				Destroy(helper.gameObject);
+			} else 
+			{
+				DestroyImmediate(helper.gameObject);
+			}
+			helper = null;
+		}
+
+		private void clearPresentationState()
+		{
+			EditorApplication.playmodeStateChanged -= playmodeChangeHandler;
+			EditorApplication.update -= updateHandler;
+		}
+
+		#endregion
+
+		#region Event handlers
+
+#if UNITY_EDITOR
+
+		private void updateHandler()
+		{
+			if (!Application.isPlaying)
+			{
+				gameViewTicker.Tick();
+			}
+		}
+
 		private void playmodeChangeHandler()
 		{
 			if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
@@ -348,21 +415,22 @@ namespace Unity.Presentation
 				destroySceneHelper();
 				switch (playModeChangeReason)
 				{
-					case PlayModeChange.ExitBeforeStart:
-						startPresentation(startFrom);
-						break;
-					case PlayModeChange.SlideChangedPlayMode:
-						changeSlide();
-						break;
-					case PlayModeChange.ExitBeforeStop:
-						restoreEditorState();
-						break;
-					case PlayModeChange.User:
-						var newScene = deck.Slides[currentSlideId].ScenePath;
-						if (string.IsNullOrEmpty(newScene)) restoreEditorState();
-						else EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
-						createSceneHelper();
-						break;
+				case PlayModeChange.ExitBeforeStart:
+					startPresentation(startFrom);
+					break;
+				case PlayModeChange.SlideChangedPlayMode:
+					changeSlide();
+					break;
+				case PlayModeChange.ExitBeforeStop:
+					restoreEditorState();
+					clearPresentationState();
+					break;
+				case PlayModeChange.User:
+					var newScene = deck.Slides[currentSlideId].ScenePath;
+					if (string.IsNullOrEmpty(newScene)) restoreEditorState();
+					else EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
+					createSceneHelper();
+					break;
 				}
 				playModeChangeReason = PlayModeChange.User;
 			} 
@@ -388,42 +456,7 @@ namespace Unity.Presentation
 			}
 		}
 
-		private void openEmptyScene()
-		{
-			// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
-			EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
-		}
-
-		private void createSceneHelper()
-		{
-			var go = new GameObject();
-			go.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor | HideFlags.HideInHierarchy;
-
-			helper = go.AddComponent<PresentationHelper>();
-			helper.Frame += frameHandler;
-			helper.NextSlide = props.NextSlide;
-			helper.PreviousSlide = props.PreviousSlide;
-			helper.Previous += previousSlideHandler;
-			helper.Next += nextSlideHandler;
-		}
-
-		private void destroySceneHelper()
-		{
-			if (helper == null) return;
-
-			if (Application.isPlaying) 
-			{
-				Destroy(helper.gameObject);
-			} else 
-			{
-				DestroyImmediate(helper.gameObject);
-			}
-			helper = null;
-		}
-
-		#endregion
-
-		#region Event handlers
+#endif
 
 		private void previousSlideHandler(object sender, EventArgs e)
 		{
@@ -458,6 +491,36 @@ namespace Unity.Presentation
 		}
 
 		#endregion
+
+		private class Ticker
+		{
+			private float interval;
+			private double nextTime;
+			private Action action;
+
+			public Ticker(float interval, Action action)
+			{
+				this.interval = interval;
+				this.action = action;
+
+				reset();
+			}
+
+			public void Tick()
+			{
+				var delta = nextTime - EditorApplication.timeSinceStartup;
+				if (delta <= 0)
+				{
+					action();
+					reset();
+				}
+			}
+
+			private void reset()
+			{
+				nextTime = EditorApplication.timeSinceStartup + interval;
+			}
+		}
 
 	}
 

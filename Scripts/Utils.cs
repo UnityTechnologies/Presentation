@@ -29,34 +29,5 @@ namespace Unity.Presentation
 			}
 		}
 
-#if UNITY_EDITOR
-
-		private static System.Type GameView;
-		private static System.Type WindowLayout;
-		private static MethodInfo FindEditorWindowOfType;
-		private static MethodInfo IsMaximized;
-		private static MethodInfo Maximize;
-		private static MethodInfo Unmaximize;
-
-		public static void ToggleGameViewSize()
-		{
-			if (GameView == null)
-			{
-				GameView = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
-				WindowLayout = typeof(Editor).Assembly.GetType("UnityEditor.WindowLayout");
-				FindEditorWindowOfType = WindowLayout.GetMethod("FindEditorWindowOfType", BindingFlags.Static | BindingFlags.NonPublic);
-				IsMaximized = WindowLayout.GetMethod("IsMaximized", BindingFlags.Static | BindingFlags.NonPublic);
-				Maximize = WindowLayout.GetMethod("Maximize", BindingFlags.Static | BindingFlags.Public);
-				Unmaximize = WindowLayout.GetMethod("Unmaximize", BindingFlags.Static | BindingFlags.Public);
-			}
-
-			var gameView = FindEditorWindowOfType.Invoke(null, new object[]{GameView});
-			if ((bool)IsMaximized.Invoke(null, new object[]{gameView}))
-				Unmaximize.Invoke(null, new object[]{gameView});
-			else
-				Maximize.Invoke(null, new object[]{gameView});
-		}
-#endif
-
 	}
 }

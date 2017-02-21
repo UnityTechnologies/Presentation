@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEditor;
+#endif
+using UnityEngine;
 using System.Collections;
 using System;
 
@@ -20,6 +23,10 @@ namespace Unity.Presentation
 		[HideInInspector]
 		public KeyCode NextSlide = KeyCode.RightArrow;
 
+		void Awake()
+		{
+		}
+
 		void Update() 
 		{
 			if (Frame != null) Frame(this, EventArgs.Empty);
@@ -29,7 +36,7 @@ namespace Unity.Presentation
 			else if (Input.GetKeyUp(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift))
 			{
 #if UNITY_EDITOR
-				Utils.ToggleGameViewSize();
+				InternalHelper.ToggleGameViewSize();
 #endif
 			}
 		}
@@ -37,11 +44,13 @@ namespace Unity.Presentation
 #if UNITY_EDITOR
 		void OnGUI()
 		{
+//			Debug.Log(1);
 			if (Application.isPlaying) return;
 			if (Event.current.type == EventType.KeyUp)
 			{
-				if (Event.current.keyCode == PreviousSlide) Debug.Log("PREV");
-				else if (Event.current.keyCode == NextSlide) Debug.Log("NEXT");
+				Debug.Log(Event.current.type + " " + Event.current.keyCode);
+				if (Event.current.keyCode == PreviousSlide && Previous != null) Previous(this, EventArgs.Empty);
+				else if (Event.current.keyCode == NextSlide && Next != null) Next(this, EventArgs.Empty);
 			}
 		}
 #endif
@@ -52,5 +61,6 @@ namespace Unity.Presentation
 			Next = null;
 			Frame = null;
 		}
+
 	}
 }
