@@ -44,11 +44,9 @@ namespace Unity.Presentation
 #if UNITY_EDITOR
 		void OnGUI()
 		{
-//			Debug.Log(1);
 			if (Application.isPlaying) return;
 			if (Event.current.type == EventType.KeyUp)
 			{
-				Debug.Log(Event.current.type + " " + Event.current.keyCode);
 				if (Event.current.keyCode == PreviousSlide && Previous != null) Previous(this, EventArgs.Empty);
 				else if (Event.current.keyCode == NextSlide && Next != null) Next(this, EventArgs.Empty);
 			}

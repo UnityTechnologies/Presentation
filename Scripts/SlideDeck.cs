@@ -10,6 +10,7 @@ namespace Unity.Presentation
 	/// <summary>
 	/// Presentation asset.
 	/// </summary>
+	[CreateAssetMenu(fileName = "Slide Deck", menuName = "Slide Deck")]
 	public class SlideDeck : ScriptableObject 
 	{
 		public List<PresentationSlide> Slides = new List<PresentationSlide>();
@@ -72,7 +73,6 @@ namespace Unity.Presentation
 
 	/// <summary>
 	/// Presentation slide.
-	/// TODO: Need to preprocess slides to convert Scene -> ScenePath
 	/// </summary>
 	[Serializable]
 	public class PresentationSlide
