@@ -121,7 +121,6 @@ namespace Unity.Presentation
 		private PresentationState state = PresentationState.Default;
 		private PlayModeChange playModeChangeReason = PlayModeChange.User;
 		private PresentationHelper helper;
-		private int newSceneIndex;
 
 		private Ticker gameViewTicker;
 
@@ -301,8 +300,7 @@ namespace Unity.Presentation
 					try 
 					{
 						state = PresentationState.LoadingScene;
-						newSceneIndex = SceneManager.sceneCount;
-						SceneManager.LoadSceneAsync(newScene, LoadSceneMode.Additive);
+						SceneManager.LoadSceneAsync(newScene, LoadSceneMode.Single);
 					} 
 					catch
 					{
@@ -472,19 +470,12 @@ namespace Unity.Presentation
 		{
 			if (state == PresentationState.LoadingScene)
 			{
-				var scene = SceneManager.GetSceneAt(newSceneIndex);
+				var scene = SceneManager.GetSceneAt(0);
+
 				if (scene.isLoaded)
 				{
 					state = PresentationState.Default;
-
-					SceneManager.SetActiveScene(scene);
 					destroySceneHelper();
-					for (var i = 0; i < newSceneIndex ; i++) 
-					{
-						var s = SceneManager.GetSceneAt(0);
-						SceneManager.UnloadSceneAsync(s);
-					}
-
 					createSceneHelper();
 				}
 			}
