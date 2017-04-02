@@ -48,6 +48,9 @@ namespace Unity.Presentation
 		// The list of slides.
 		public List<PresentationSlide> Slides = new List<PresentationSlide>();
 
+		// Slides background color
+		public Color BackgroundColor = Color.black;
+
 		// Indicates if the slide deck is saved to disk.
 		public bool IsSavedOnDisk
 		{
