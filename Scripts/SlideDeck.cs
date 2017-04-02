@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.Presentation.Utils;
+using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -46,10 +48,17 @@ namespace Unity.Presentation
 		#region Public fields/properties
 
 		// The list of slides.
-		public List<PresentationSlide> Slides = new List<PresentationSlide>();
+		public List<PresentationSlide> Slides 
+		{
+			get { return slides; }
+		}
 
 		// Slides background color
-		public Color BackgroundColor = Color.black;
+		public Color BackgroundColor
+		{
+			get { return backgroundColor; }
+			set { backgroundColor = value; }
+		}
 
 		// Indicates if the slide deck is saved to disk.
 		public bool IsSavedOnDisk
@@ -85,6 +94,17 @@ namespace Unity.Presentation
 				return name;
 			}
 		}
+
+		#endregion
+
+		#region Private variables
+
+		[SerializeField]
+		[FormerlySerializedAs("Slides")]
+		public List<PresentationSlide> slides = new List<PresentationSlide>();
+
+		[SerializeField]
+		private Color backgroundColor = Color.black;
 
 		#endregion
 

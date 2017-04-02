@@ -11,49 +11,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20d36f140d93042978901db40338cdc8, type: 3}
   m_Name: Unity Sample Presentation (Dark)
   m_EditorClassIdentifier: 
-  Slides:
+  slides:
   - Scene: {fileID: 102900000, guid: 19257c4d45b394bc0b076ab495cd8257, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: bc9f66b7a3f564f0ea8d0719ba359b4c, type: 3}
+    scenePath: 
     Visible: 0
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 9211f6193b28e46efbdb101263915b26, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 556090e746aa84b43a70c21cef0765be, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 0
   - Scene: {fileID: 102900000, guid: b5d64a5b6cdbc4d4e8f65f9614f26bb4, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 0
   - Scene: {fileID: 102900000, guid: 26f45122a5d044eb790f20712d10e7af, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: a411f5f13be3a4cf3bfa051e5cf82022, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 044793db27449469d8786db0e0406128, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: fb8e5e762a3024fb7abc99d1a6062970, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: f96d2ad34d0594ba29686622a8e789b2, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 4350ff9038d5649a6b970ecb6a528ddd, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: b54e1dadfcedf4e48af2de6b86ea5c89, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: fd450e0b0c7b04bbe8a0f8c2076b0fe8, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 772c063127809477a8ffc21736aa0310, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
   - Scene: {fileID: 102900000, guid: 9fe8fa2d5b60e448da99dbebbba92c2e, type: 3}
+    scenePath: 
     Visible: 1
     StartInPlayMode: 1
+  backgroundColor: {r: 0.13333334, g: 0.16862746, b: 0.21568629, a: 1}

@@ -5,6 +5,7 @@ using UnityEditor;
 using Unity.Presentation;
 using UnityEditorInternal;
 using System;
+using Unity.Presentation.Utils;
 
 namespace Unity.Presentation.Inspectors
 {
@@ -18,6 +19,9 @@ namespace Unity.Presentation.Inspectors
 
 		private class Styles
 		{
+			public readonly GUIContent TEXT_OPTIONS = new GUIContent("Options");
+			public readonly GUIContent TEXT_BG_COLOR = new GUIContent("Background", "Background color of all slides in the presentation.");
+
 			public readonly int ELEMENT_HEIGHT = 20;
 			public readonly int SCROLLBAR_WIDTH = 16;
 
@@ -86,7 +90,7 @@ namespace Unity.Presentation.Inspectors
 
 				list.onChangedCallback += (l) => 
 				{
-					deck.Save();
+//					deck.Save();
 				};
 
 				list.drawHeaderCallback += (Rect rect) => GUI.Label(rect, deck.IsSavedOnDisk ? deck.Name + ".asset" : "<not saved>");
@@ -183,6 +187,17 @@ namespace Unity.Presentation.Inspectors
 			scroll = EditorGUILayout.BeginScrollView(new Vector2(0, scroll), false, false, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)).y;
 			var r = GUILayoutUtility.GetRect(0, list.GetHeight() + 20);
 			list.DoList(r);
+
+			var propsName = "presentation_" + deck.name + "_options";
+			var showOptions = EditorPrefs.GetBool(propsName, false);
+			showOptions = GUIElements.Header(styles.TEXT_OPTIONS, showOptions);
+			if (showOptions)
+			{
+				EditorGUI.indentLevel++;
+				deck.BackgroundColor = EditorGUILayout.ColorField(styles.TEXT_BG_COLOR, deck.BackgroundColor, true, false, false, new ColorPickerHDRConfig(0, 1, 0, 1), GUILayout.ExpandWidth(true));
+				EditorGUI.indentLevel--;
+			}
+			EditorPrefs.SetBool(propsName, showOptions);
 			EditorGUILayout.EndScrollView();
 
 			return scroll;
