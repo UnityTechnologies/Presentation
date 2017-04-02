@@ -120,6 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Properties: {fileID: 11400000, guid: eea306b8eed6d4e7890e2b9b9282c1cc, type: 2}
+  Deck: {fileID: 11400000, guid: a3a2d7ee499fa417ab90244a25779a2c, type: 2}
 --- !u!4 &359984150
 Transform:
   m_ObjectHideFlags: 0

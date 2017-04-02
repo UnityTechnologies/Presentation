@@ -1,12 +1,11 @@
-﻿#if UNITY_EDITOR
-using UnityEditor;
-using Unity.Presentation.Utils;
-
-
-#endif
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using Unity.Presentation.Utils;
+#endif
 
 namespace Unity.Presentation.Behaviors
 {
@@ -41,7 +40,13 @@ namespace Unity.Presentation.Behaviors
 #if UNITY_EDITOR
 				InternalHelper.ToggleGameViewSize();
 #endif
+			} 
+#if !UNITY_EDITOR
+			else if (Input.GetKeyUp(KeyCode.Escape))
+			{
+				Application.Quit();
 			}
+#endif
 		}
 			
 #if UNITY_EDITOR

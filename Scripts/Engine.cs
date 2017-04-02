@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Unity.Presentation.Behaviors;
 using Unity.Presentation.Utils;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 
 namespace Unity.Presentation 
 {
@@ -112,17 +115,19 @@ namespace Unity.Presentation
 		private bool isPresenting = false;
 		[SerializeField]
 		private int currentSlideId = 0;
-		[SerializeField]
-		private SceneSetup[] defaultSceneSetup;
 
 		private Properties props;
 
-		private int startFrom = 0;
 		private PresentationState state = PresentationState.Default;
 		private PlayModeChange playModeChangeReason = PlayModeChange.User;
 		private PresentationHelper helper;
 
+#if UNITY_EDITOR
+		private int startFrom = 0;
 		private Ticker gameViewTicker;
+		[SerializeField]
+		private SceneSetup[] defaultSceneSetup;
+#endif
 
 		#endregion
 
@@ -139,6 +144,7 @@ namespace Unity.Presentation
 		{
 			if (deck == null) 
 			{
+#if UNITY_EDITOR
 				var path = EditorUtility.OpenFilePanel("Open Slide Deck", Application.dataPath, "asset");
 				if (string.IsNullOrEmpty(path)) return;
 				path = Path.Combine("Assets", path.Substring(Application.dataPath.Length + 1));
@@ -149,6 +155,7 @@ namespace Unity.Presentation
 					return;
 				}
 				this.deck = newDeck;
+#endif
 			}
 			else
 			{
@@ -169,15 +176,19 @@ namespace Unity.Presentation
 				changePlayMode(false, PlayModeChange.ExitBeforeStart);
 			}
 			else
-#endif
 			{
 				startPresentation(slide);
 			}
+#else
+			createSceneHelper();
+			startPresentation(slide);
+#endif
 		}
 
 		public void StopPresentation()
 		{
 			isPresenting = false;
+#if UNITY_EDITOR
 			if (EditorApplication.isPlaying)
 				changePlayMode(false, PlayModeChange.ExitBeforeStop);
 			else
@@ -186,6 +197,7 @@ namespace Unity.Presentation
 				clearPresentationState();
 				restoreEditorState();
 			}
+#endif
 		}
 
 		public void NextSlide()
@@ -211,6 +223,8 @@ namespace Unity.Presentation
 		private void OnEnable()
 		{
 			props = Properties.Instance;
+
+#if UNITY_EDITOR
 			gameViewTicker = new Ticker(0.5f, () => {
 				var cam = Camera.main;
 				if (cam == null) return; // fails when going to Play Mode
@@ -223,6 +237,7 @@ namespace Unity.Presentation
 				EditorApplication.update += updateHandler;
 				EditorApplication.playmodeStateChanged += playmodeChangeHandler;
 			}
+#endif
 		}
 
 		#endregion
@@ -231,8 +246,10 @@ namespace Unity.Presentation
 
 		private void changePlayMode(bool value, PlayModeChange reason)
 		{
+#if UNITY_EDITOR
 			playModeChangeReason = reason;
 			EditorApplication.isPlaying = value;
+#endif
 		}
 
 		private void startPresentation(int slide)
@@ -260,7 +277,12 @@ namespace Unity.Presentation
 			if (i < 0 || i >= deck.Slides.Count || i == currentSlideId) return;
 
 			var newSlide = deck.Slides[i];
-			if (!newSlide.Visible || string.IsNullOrEmpty(newSlide.ScenePath))
+			if (!newSlide.Visible || 
+				string.IsNullOrEmpty(newSlide.ScenePath)
+#if !UNITY_EDITOR
+				|| !newSlide.StartInPlayMode
+#endif
+			)
 			{
 				if (i > currentSlideId) gotoSlide(i + 1);
 				else gotoSlide(i - 1);
@@ -269,6 +291,7 @@ namespace Unity.Presentation
 
 			currentSlideId = i;
 
+#if UNITY_EDITOR
 			var wasInPlayMode = EditorApplication.isPlaying;
 			if (newSlide.StartInPlayMode)
 			{
@@ -287,6 +310,9 @@ namespace Unity.Presentation
 				} 
 				else changeSlide();
 			}
+#else
+			changeSlide(); 
+#endif
 		}
 
 		private void changeSlide()
@@ -295,8 +321,10 @@ namespace Unity.Presentation
 			var newScene = newSlide.ScenePath;
 			if (!string.IsNullOrEmpty(newScene))
 			{
+#if UNITY_EDITOR
 				if (EditorApplication.isPlaying)
 				{
+#endif
 					try 
 					{
 						state = PresentationState.LoadingScene;
@@ -306,6 +334,7 @@ namespace Unity.Presentation
 					{
 						state = PresentationState.Default;
 					}
+#if UNITY_EDITOR
 				} 
 				else 
 				{
@@ -313,28 +342,27 @@ namespace Unity.Presentation
 					EditorSceneManager.OpenScene(newScene, OpenSceneMode.Single);
 					createSceneHelper();
 				}
+#endif
 
 				if (SlideChanged != null) SlideChanged(this, new SlideEventArgs(currentSlideId));
 			}
 		}
 
+#if UNITY_EDITOR
 		private void fixScenes()
 		{
-#if UNITY_EDITOR
 			// Need to fetch all scenes since visibility and play mode can be switched in play mode
 			SceneUtils.UpdateBuildScenes(deck, SlideDeck.PlayModeType.All, SlideDeck.VisibilityType.All);
-#endif
 		}
 
 		private void saveEditorState()
 		{
-#if UNITY_EDITOR
 			defaultSceneSetup = EditorSceneManager.GetSceneManagerSetup();
-#endif
 		}
 
 		private void restoreEditorState()
 		{
+			
 			if (defaultSceneSetup != null && defaultSceneSetup.Length > 0) EditorSceneManager.RestoreSceneManagerSetup(defaultSceneSetup);
 		}
 
@@ -344,6 +372,13 @@ namespace Unity.Presentation
 			EditorSceneManager.OpenScene(SceneUtils.EmptyScenePath, OpenSceneMode.Single);
 		}
 
+		private void clearPresentationState()
+		{
+			EditorApplication.playmodeStateChanged -= playmodeChangeHandler;
+			EditorApplication.update -= updateHandler;
+		}
+
+#endif
 		private void createSceneHelper()
 		{
 			var go = new GameObject();
@@ -369,12 +404,6 @@ namespace Unity.Presentation
 				DestroyImmediate(helper.gameObject);
 			}
 			helper = null;
-		}
-
-		private void clearPresentationState()
-		{
-			EditorApplication.playmodeStateChanged -= playmodeChangeHandler;
-			EditorApplication.update -= updateHandler;
 		}
 
 		#endregion
@@ -469,6 +498,7 @@ namespace Unity.Presentation
 
 		#endregion
 
+#if UNITY_EDITOR
 		private class Ticker
 		{
 			private float interval;
@@ -498,6 +528,7 @@ namespace Unity.Presentation
 				nextTime = EditorApplication.timeSinceStartup + interval;
 			}
 		}
+#endif
 
 	}
 

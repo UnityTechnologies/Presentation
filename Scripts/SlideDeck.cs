@@ -63,9 +63,9 @@ namespace Unity.Presentation
 			}
 		}
 
+#if UNITY_EDITOR
 		public void Save(bool createAssetIfNeeded = false)
 		{
-#if UNITY_EDITOR
 			if (IsSavedOnDisk)
 			{
 				EditorUtility.SetDirty(this);
@@ -83,8 +83,16 @@ namespace Unity.Presentation
 					AssetDatabase.SaveAssets();
 				}
 			}
-#endif
 		}
+
+		public void BakeSlides()
+		{
+			foreach (var slide in Slides)
+			{
+				slide.Bake();
+			}
+		}
+#endif
 
 		public List<PresentationSlide> GetSlides(PlayModeType playmode, VisibilityType visibility)
 		{
@@ -95,14 +103,24 @@ namespace Unity.Presentation
 			foreach (var slide in Slides)
 			{
 				if (slide.StartInPlayMode)
-					if ((playmode | PlayModeType.PlayMode) != 0) list.Add(slide);
+				{
+					if ((playmode & PlayModeType.PlayMode) == 0) continue;
+				}
 				else
-					if ((playmode | PlayModeType.NonPlayMode) != 0) list.Add(slide);
+				{
+					if ((playmode & PlayModeType.NonPlayMode) == 0) continue;
+				}
 
 				if (slide.Visible)
-					if ((visibility | VisibilityType.Visible) != 0) list.Add(slide);
+				{
+					if ((visibility & VisibilityType.Visible) == 0) continue;
+				}
 				else
-					if ((visibility | VisibilityType.Invisible) != 0) list.Add(slide);
+				{
+					if ((visibility & VisibilityType.Invisible) == 0) continue;
+				}
+
+				list.Add(slide);
 			}
 
 			return list;
@@ -120,10 +138,26 @@ namespace Unity.Presentation
 		{
 			get 
 			{
+#if UNITY_EDITOR
 				return AssetDatabase.GetAssetPath(Scene);
+#else
+				return scenePath;
+#endif
 			}
 		}
+
+#if UNITY_EDITOR
+		public void Bake()
+		{
+			scenePath = ScenePath;
+		}
+
 		public SceneAsset Scene;
+#endif
+#pragma warning disable 414
+		[SerializeField]
+		private string scenePath;
+#pragma warning restore 414
 		public bool Visible = true;
 		public bool StartInPlayMode = true;
 	}

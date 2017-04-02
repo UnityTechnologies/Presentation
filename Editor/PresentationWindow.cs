@@ -112,6 +112,7 @@ namespace Unity.Presentation
 			} 
 			else 
 			{
+				var shouldBuild = false;
 				var bgcolor = GUI.backgroundColor;
 				var deck = state.SlideDeck;
 
@@ -131,7 +132,7 @@ namespace Unity.Presentation
 				}
 				if (GUILayout.Button(styles.TEXT_BUILD, styles.BUTTON))
 				{
-					EditorUtils.BuildPresentation(deck);
+					shouldBuild = true;
 				}
 				GUI.enabled = true;
 
@@ -166,6 +167,11 @@ namespace Unity.Presentation
 
 				// Slides list
 				scroll = SlideDeckEditor.DrawInspector(deck, scroll, shouldSelect, itemPlayHandler);
+
+				if (shouldBuild)
+				{
+					EditorUtils.BuildPresentation(deck);
+				}
 			}
 		}
 
