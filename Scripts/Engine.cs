@@ -59,6 +59,8 @@ namespace Unity.Presentation
 
 		#region Consts
 
+		public readonly Version VERSION = new Version(1, 0);
+
 		// Slide state events.
 		public delegate void SlideEventHandler(object sender, SlideEventArgs e);
 
