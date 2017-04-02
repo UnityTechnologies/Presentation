@@ -6,6 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using System;
 using Unity.Presentation.Inspectors;
+using Unity.Presentation.Utils;
 
 namespace Unity.Presentation 
 {
@@ -19,6 +20,7 @@ namespace Unity.Presentation
 		{
 			public readonly Color SELECTED_COLOR = new Color(1, 0, 0);
 
+			public readonly GUIStyle BUTTON = new GUIStyle("CommandMid");
 			public readonly GUIStyle BUTTONS_LEFT = new GUIStyle("CommandLeft");
 			public readonly GUIStyle BUTTONS_MID = new GUIStyle("CommandMid");
 			public readonly GUIStyle BUTTONS_RIGHT = new GUIStyle("CommandRight");
@@ -27,6 +29,7 @@ namespace Unity.Presentation
 			public readonly GUIContent TEXT_NEW = new GUIContent("New", "Create new Presentation");
 			public readonly GUIContent TEXT_LOAD = new GUIContent("Load", "Load Presentation from disk");
 			public readonly GUIContent TEXT_SAVE = new GUIContent("Save", "Save Presentation to disk");
+			public readonly GUIContent TEXT_BUILD = new GUIContent("Build", "Build Standalone Presentation for selected platform");
 			public readonly GUIContent TEXT_PREV = new GUIContent("<<", "Go to the previous slide");
 			public readonly GUIContent TEXT_FROM_BEGINNING = new GUIContent("> B", "Start Presentation from the first slide");
 			public readonly GUIContent TEXT_STOP = new GUIContent("Stop", "Stop Presentation");
@@ -34,6 +37,12 @@ namespace Unity.Presentation
 
 			public Styles()
 			{
+				var c = new GUIStyle("Command");
+
+				BUTTON.fontSize = 9;
+				// GUIStyle("Command") doesn't display text
+				BUTTON.normal.background = c.normal.background;
+				BUTTON.active.background = c.active.background;
 				BUTTONS_LEFT.fontSize = 9;
 				BUTTONS_MID.fontSize = 9;
 				BUTTONS_RIGHT.fontSize = 9;
@@ -119,6 +128,10 @@ namespace Unity.Presentation
 				if (GUILayout.Button(styles.TEXT_SAVE, styles.BUTTONS_RIGHT))
 				{
 					deck.Save(true);
+				}
+				if (GUILayout.Button(styles.TEXT_BUILD, styles.BUTTON))
+				{
+					EditorUtils.BuildPresentation(deck);
 				}
 				GUI.enabled = true;
 

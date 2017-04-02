@@ -20,6 +20,14 @@ public static class SceneUtils
 		}
 	}
 
+	public static string LoaderScenePath
+	{
+		get
+		{
+			return Path.Combine(PresentationUtils.PackageRoot, "Scenes/Loader.unity");
+		}
+	}
+
 #if UNITY_EDITOR
 	public static List<EditorBuildSettingsScene> GetNonDeckScenes(SlideDeck deck)
 	{
