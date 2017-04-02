@@ -6,9 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Unity.Presentation
+namespace Unity.Presentation.Utils
 {
-	public class Utils
+	public class PresentationUtils
 	{
 
 		public const string DEFAULT_PACKAGE_ROOT = "Assets/Presentation";

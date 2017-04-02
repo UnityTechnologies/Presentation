@@ -4,7 +4,7 @@ using System.Reflection;
 #endif
 using UnityEngine;
 
-namespace Unity.Presentation
+namespace Unity.Presentation.Utils
 {
 	public class InternalHelper 
 	{

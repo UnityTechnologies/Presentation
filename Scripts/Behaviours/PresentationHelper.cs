@@ -1,11 +1,14 @@
 ﻿#if UNITY_EDITOR
 using UnityEditor;
+using Unity.Presentation.Utils;
+
+
 #endif
 using UnityEngine;
 using System.Collections;
 using System;
 
-namespace Unity.Presentation 
+namespace Unity.Presentation.Behaviors
 {
 	/// <summary>
 	/// A helper behavior for various presentation functions.

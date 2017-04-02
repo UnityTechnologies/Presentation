@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Presentation.Behaviors;
+using Unity.Presentation.Utils;
 
 namespace Unity.Presentation 
 {
@@ -355,7 +357,7 @@ namespace Unity.Presentation
 		private void openEmptyScene()
 		{
 			// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
-			EditorSceneManager.OpenScene(Path.Combine(Utils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
+			EditorSceneManager.OpenScene(Path.Combine(PresentationUtils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
 		}
 
 		private void createSceneHelper()

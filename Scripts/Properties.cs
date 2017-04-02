@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Presentation.Utils;
 
 namespace Unity.Presentation 
 {
@@ -24,7 +25,7 @@ namespace Unity.Presentation
 			{
 				if (instance == null)
 				{
-					var path = Path.Combine(Utils.PackageRoot, ASSET_NAME);
+					var path = Path.Combine(PresentationUtils.PackageRoot, ASSET_NAME);
 					instance = AssetDatabase.LoadAssetAtPath<Properties>(path);
 
 					if (instance == null)
