@@ -9,15 +9,20 @@ using System.IO;
 
 namespace Unity.Presentation.Utils
 {
+
+	// Editor-only utility methods.
 	public static class EditorUtils
 	{
+
+		// Builds presentation deck as a standalone application.
+		// SlideDeck deck -- Slide deck to use for the standalone application.
 		public static void BuildPresentation(SlideDeck deck)
 		{
 			string path = EditorUtility.SaveFolderPanel("Choose Location of the Presentation build", "", "");
 			if (string.IsNullOrEmpty(path)) return;
 
 			updateLoaderScene(deck);
-			deck.BakeSlides();
+			deck.PrepareSlidesForBuild();
 
 			var scenes = SceneUtils.GetBuildScenes(deck, SlideDeck.PlayModeType.PlayMode, SlideDeck.VisibilityType.Visible);
 			scenes.Insert(0, new EditorBuildSettingsScene(SceneUtils.LoaderScenePath, true));
@@ -36,6 +41,8 @@ namespace Unity.Presentation.Utils
 
 		}
 
+		// Updates Loader scene parameters to run the deck on start.
+		// SlideDeck deck -- Slide deck to use for the standalone application.  
 		private static void updateLoaderScene(SlideDeck deck)
 		{
 			var sceneSetup = EditorSceneManager.GetSceneManagerSetup();
@@ -50,6 +57,7 @@ namespace Unity.Presentation.Utils
 			var so = new SerializedObject(loader);
 			so.Update();
 
+			// Set properties.
 			var prop = so.FindProperty("Properties");
 			prop.objectReferenceValue = Properties.Instance;
 			var d = so.FindProperty("Deck");

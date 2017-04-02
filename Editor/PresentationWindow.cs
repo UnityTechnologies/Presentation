@@ -10,11 +10,12 @@ using Unity.Presentation.Utils;
 
 namespace Unity.Presentation 
 {
-	/// <summary>
-	/// Presentation configuration window.
-	/// </summary>
+	// Presentation configuration window.
+	// To open this window go to Window > Presentation in the editor.
 	public class PresentationWindow : EditorWindow 
 	{
+
+		#region Styles
 
 		private class Styles
 		{
@@ -40,7 +41,7 @@ namespace Unity.Presentation
 				var c = new GUIStyle("Command");
 
 				BUTTON.fontSize = 9;
-				// GUIStyle("Command") doesn't display text
+				// GUIStyle("Command") doesn't display text.
 				BUTTON.normal.background = c.normal.background;
 				BUTTON.active.background = c.active.background;
 				BUTTONS_LEFT.fontSize = 9;
@@ -54,6 +55,10 @@ namespace Unity.Presentation
 			}
 		}
 
+		#endregion
+
+		#region Static methods
+
 		[MenuItem("Window/Presentation")]
 		public static void ShowWindow()
 		{
@@ -62,12 +67,28 @@ namespace Unity.Presentation
 			wnd.Show();
 		}
 
+		#endregion
+
+		#region Private variables
+
+		// Window styles.
 		private static Styles styles;
 
+		// Properties ScriptableObject.
 		private Properties props;
+
+		// Main presentation engine ScriptableObject.
 		private Engine state;
+
+		// Scroll position for slide list.
 		private float scroll;
+
+		// Whether the window is currently focused.
 		private bool focused;
+
+		#endregion
+
+		#region Unity callbacks
 
 		private void OnEnable()
 		{
@@ -82,14 +103,14 @@ namespace Unity.Presentation
 
 		private void OnFocus()
 		{
-			// Going int play mode
+			// Going into play mode.
 			if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying) return;
 			focused = true;
 		}
 
 		private void OnLostFocus()
 		{
-			// Going int play mode
+			// Going into play mode.
 			if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying) return;
 			focused = false;
 		}
@@ -98,6 +119,7 @@ namespace Unity.Presentation
 		{
 			if (styles == null) styles = new Styles();
 
+			// Get next/previous slide events if the window is focused.
 			if (Event.current.type == EventType.KeyUp)
 			{
 				if (Event.current.keyCode == props.PreviousSlide)
@@ -165,7 +187,7 @@ namespace Unity.Presentation
 
 				EditorGUILayout.Space();
 
-				// Slides list
+				// Slides list.
 				scroll = SlideDeckEditor.DrawInspector(deck, scroll, shouldSelect, itemPlayHandler);
 
 				if (shouldBuild)
@@ -175,18 +197,26 @@ namespace Unity.Presentation
 			}
 		}
 
-		private void itemPlayHandler(SlideDeck deck, int index)
-		{
-			if (state.SlideDeck != deck) return;
-			if (state.IsPresenting) state.GotoSlide(index);
-			else state.StartPresentation(index);
-		}
+		#endregion
+
+		#region Private functions
 
 		private bool shouldSelect(SlideDeck deck, int index)
 		{
 			if (state.SlideDeck != deck) return false;
 			if (!state.IsPresenting) return false;
 			return state.CurrentSlideId == index;
+		}
+
+		#endregion
+
+		#region Event handlers
+
+		private void itemPlayHandler(SlideDeck deck, int index)
+		{
+			if (state.SlideDeck != deck) return;
+			if (state.IsPresenting) state.GotoSlide(index);
+			else state.StartPresentation(index);
 		}
 
 		private void slideChangedHandler(object sender, SlideEventArgs e)
@@ -198,10 +228,12 @@ namespace Unity.Presentation
 		{
 			if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
 			{
-				// Went out of Play Mode
+				// Went out of Play Mode. If we had focus, need to refocus the window.
 				if (focused) Focus();
 			} 
 		}
+
+		#endregion
 
 	}
 }

@@ -8,16 +8,20 @@ using System.Reflection;
 
 namespace Unity.Presentation.Utils
 {
+
+	// General presentation utils.
 	public class PresentationUtils
 	{
-
+		// Default presentation folder root.
 		public const string DEFAULT_PACKAGE_ROOT = "Assets/Presentation";
 
+		// Returns presentation folder root in the project.
 		public static string PackageRoot
 		{
 			get 
 			{
 #if UNITY_EDITOR
+				// Looks the folder relative to Editor/PresentationWindow.cs in case it was moved in the project.
 				var guids = AssetDatabase.FindAssets("PresentationWindow t:Script");
 				if (guids.Length == 0) return DEFAULT_PACKAGE_ROOT;
 

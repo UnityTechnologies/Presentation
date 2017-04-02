@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace Unity.Presentation.Utils
 {
+
+	// Reflection helper.
 	public class InternalHelper 
 	{
 #if UNITY_EDITOR
@@ -18,12 +20,14 @@ namespace Unity.Presentation.Utils
 		private static MethodInfo WindowLayout_Maximize;
 		private static MethodInfo WindowLayout_Unmaximize;
 
+		// Returns current main Game View.
 		public static EditorWindow GetGameView()
 		{
 			initWindowTypes();
 			return WindowLayout_FindEditorWindowOfType.Invoke(null, new object[]{GameView}) as EditorWindow;
 		}
 
+		// Toggles Maximized state of a Game View.
 		public static void ToggleGameViewSize()
 		{
 			initWindowTypes();
@@ -34,6 +38,7 @@ namespace Unity.Presentation.Utils
 				WindowLayout_Maximize.Invoke(null, new object[]{gameView});
 		}
 
+		// Initializes reflection.
 		private static void initWindowTypes()
 		{
 			if (GameView != null) return;

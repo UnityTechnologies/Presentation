@@ -8,29 +8,47 @@ using UnityEditor;
 
 namespace Unity.Presentation 
 {
-	/// <summary>
-	/// Presentation asset.
-	/// </summary>
+	// Presentation asset.
 	[CreateAssetMenu(fileName = "Slide Deck", menuName = "Slide Deck")]
 	public class SlideDeck : ScriptableObject 
 	{
 
+		#region Consts
+
+		// Play Mode filter for GetSlides.
 		public enum PlayModeType
 		{
+			// Slides which work in Play Mode.
 			PlayMode				= 1 << 0,
+
+			// Slides which work outside of Play Mode.
 			NonPlayMode				= 1 << 1,
+
+			// All slides.
 			All						= PlayMode | NonPlayMode
 		}
 
+		// Visibility filter for GetSlides.
 		public enum VisibilityType
 		{
+			// Visible slides.
 			Visible 				= 1 << 0,
-			Invisible 				= 1 << 1,
-			All						= Visible | Invisible
+
+			// Hidden slides.
+			Hidden 					= 1 << 1,
+
+			// All slides.
+			All						= Visible | Hidden
 		}
 
+		#endregion
+
+		#region Public fields/properties
+
+		// The list of slides.
 		public List<PresentationSlide> Slides = new List<PresentationSlide>();
 
+		// Indicates if the slide deck is saved to disk.
 		public bool IsSavedOnDisk
 		{
 			get
@@ -43,6 +61,7 @@ namespace Unity.Presentation
 			}
 		}
 
+		// Returns this slide deck asset path.
 		public string Path
 		{
 			get
@@ -55,6 +74,7 @@ namespace Unity.Presentation
 			}
 		}
 
+		// Returns this slide asset name.
 		public string Name
 		{
 			get
@@ -63,7 +83,13 @@ namespace Unity.Presentation
 			}
 		}
 
+		#endregion
+
+		#region Public methods
+
 #if UNITY_EDITOR
+		// Saves the slide deck to an asset on disk.
+		// bool createAssetIfNeeded -- Should the asset file be created if this asset hasn't been saved yet.
 		public void Save(bool createAssetIfNeeded = false)
 		{
 			if (IsSavedOnDisk)
@@ -85,15 +111,19 @@ namespace Unity.Presentation
 			}
 		}
 
-		public void BakeSlides()
+		// Prepares slides for a standalone build.
+		public void PrepareSlidesForBuild()
 		{
 			foreach (var slide in Slides)
 			{
-				slide.Bake();
+				slide.PrepareForBuild();
 			}
 		}
 #endif
 
+		// Returns a list of slides based on filters.
+		// PlayModeType playmode -- Play Mode filter.
+		// VisibilityType visibility -- Visibility filter.
 		public List<PresentationSlide> GetSlides(PlayModeType playmode, VisibilityType visibility)
 		{
 			if (playmode == PlayModeType.All && visibility == VisibilityType.All) return new List<PresentationSlide>(Slides);
@@ -117,7 +147,7 @@ namespace Unity.Presentation
 				}
 				else
 				{
-					if ((visibility & VisibilityType.Invisible) == 0) continue;
+					if ((visibility & VisibilityType.Hidden) == 0) continue;
 				}
 
 				list.Add(slide);
@@ -126,14 +156,18 @@ namespace Unity.Presentation
 			return list;
 		}
 
+		#endregion
+
 	}
 
-	/// <summary>
-	/// Presentation slide.
-	/// </summary>
+	#region Slide
+
+	// Presentation slide.
 	[Serializable]
 	public class PresentationSlide
 	{
+
+		// Slide scene path.
 		public string ScenePath
 		{
 			get 
@@ -147,18 +181,29 @@ namespace Unity.Presentation
 		}
 
 #if UNITY_EDITOR
-		public void Bake()
+		// Prepares the slide for standalone build.
+		public void PrepareForBuild()
 		{
 			scenePath = ScenePath;
 		}
 
+		// Scene asset in the editor.
 		public SceneAsset Scene;
 #endif
+
 #pragma warning disable 414
 		[SerializeField]
+		// Scene path in the player.
 		private string scenePath;
 #pragma warning restore 414
+
+		// Idicates if this slide is visible or hidden.
 		public bool Visible = true;
+
+		// Indicates if this slide starts in Play Mode.
 		public bool StartInPlayMode = true;
 	}
+
+	#endregion
+
 }

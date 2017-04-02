@@ -8,9 +8,13 @@ using System;
 
 namespace Unity.Presentation.Inspectors
 {
+
+	// Custom editor for SlideDeck, also used in PresentationWindow.
 	[CustomEditor(typeof(SlideDeck))]
 	public class SlideDeckEditor : Editor 
 	{
+
+		#region Styles
 
 		private class Styles
 		{
@@ -48,12 +52,26 @@ namespace Unity.Presentation.Inspectors
 			}
 		}
 
+		#endregion
+
+		#region Private variables
+
 		private static Styles styles;
 
+		// Reorderable list cache.
 		private static Dictionary<string, ReorderableList> lists = new Dictionary<string, ReorderableList>();
 		private SlideDeck instance;
 		private float scroll;
 
+		#endregion
+
+		#region Static methods
+
+		// Draws inspector for a Slide Deck.
+		// SlideDeck deck -- slide deck to draw.
+		// float scroll -- current vertical scroll value.
+		// Func<SlideDeck, int, bool> shouldSelect -- a function which returns if the current slide should be selected.
+		// Action<SlideDeck, int> -- a function called when "Play" button of a slide is pressed.
 		public static float DrawInspector(SlideDeck deck, float scroll, Func<SlideDeck, int, bool> shouldSelect = null, Action<SlideDeck, int> onPlayPress = null)
 		{
 			if (styles == null) styles = new Styles();
@@ -62,6 +80,7 @@ namespace Unity.Presentation.Inspectors
 			var key = deck.Path + "#" + (shouldSelect != null) + "#" + (onPlayPress != null);
 			if (!lists.TryGetValue(key, out list))
 			{
+				// Init a ReorderableList for the deck and cache it.
 				list = new ReorderableList(deck.Slides, typeof(PresentationSlide), true, true, true, true);
 				lists.Add(key, list);
 
@@ -69,8 +88,11 @@ namespace Unity.Presentation.Inspectors
 				{
 					deck.Save();
 				};
+
 				list.drawHeaderCallback += (Rect rect) => GUI.Label(rect, deck.IsSavedOnDisk ? deck.Name + ".asset" : "<not saved>");
+
 				list.elementHeightCallback += (int index) => styles.ELEMENT_HEIGHT;
+
 				list.drawElementBackgroundCallback += (Rect rect, int index, bool isActive, bool isFocused) => 
 				{
 					if (Event.current.type == EventType.repaint)
@@ -99,6 +121,7 @@ namespace Unity.Presentation.Inspectors
 						GUI.backgroundColor = bgcolor;
 					}
 				};
+
 				list.drawElementCallback += (Rect rect, int index, bool isActive, bool isFocused) => 
 				{
 					var changed = false;
@@ -157,14 +180,17 @@ namespace Unity.Presentation.Inspectors
 				};
 			}
 
-			scroll = EditorGUILayout.BeginScrollView(new Vector2(0, scroll), false, false, 
-				GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)).y;
+			scroll = EditorGUILayout.BeginScrollView(new Vector2(0, scroll), false, false, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)).y;
 			var r = GUILayoutUtility.GetRect(0, list.GetHeight() + 20);
 			list.DoList(r);
 			EditorGUILayout.EndScrollView();
 
 			return scroll;
 		}
+
+		#endregion
+
+		#region Unity callbacks
 
 		private void OnEnable()
 		{
@@ -180,5 +206,8 @@ namespace Unity.Presentation.Inspectors
 
 			scroll = DrawInspector(instance, scroll);
 		}
+
+		#endregion
+
 	}
 }

@@ -9,9 +9,11 @@ using Unity.Presentation.Utils;
 using UnityEditor;
 #endif
 
+// Static scene utils.
 public static class SceneUtils
 {
 
+	// The path to the Empty.scene in the project.
 	public static string EmptyScenePath
 	{
 		get
@@ -20,6 +22,7 @@ public static class SceneUtils
 		}
 	}
 
+	// The path to the Loader.scene in the project.
 	public static string LoaderScenePath
 	{
 		get
@@ -29,6 +32,8 @@ public static class SceneUtils
 	}
 
 #if UNITY_EDITOR
+	// Returns all scenes in build settings which do not belong to the deck.
+	// SlideDeck deck -- current deck.
 	public static List<EditorBuildSettingsScene> GetNonDeckScenes(SlideDeck deck)
 	{
 		var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
@@ -48,11 +53,19 @@ public static class SceneUtils
 		return nonDeckScenes;
 	}
 
+	// Updates scenes in build settings.
+	// SlideDeck deck -- deck to use.
+	// SlideDeck.PlayModeType playmode -- Play Mode filter.
+	// SlideDeck.VisibilityType visibility -- visibility filter.
 	public static void UpdateBuildScenes(SlideDeck deck, SlideDeck.PlayModeType playmode, SlideDeck.VisibilityType visibility)
 	{
 		EditorBuildSettings.scenes = GetBuildScenes(deck, playmode, visibility).ToArray();
 	}
 
+	// Returns slide list for builds settings.
+	// SlideDeck deck -- deck to use.
+	// SlideDeck.PlayModeType playmode -- Play Mode filter.
+	// SlideDeck.VisibilityType visibility -- visibility filter.
 	public static List<EditorBuildSettingsScene> GetBuildScenes(SlideDeck deck, SlideDeck.PlayModeType playmode, SlideDeck.VisibilityType visibility)
 	{
 		var nonDeckScenes = SceneUtils.GetNonDeckScenes(deck);

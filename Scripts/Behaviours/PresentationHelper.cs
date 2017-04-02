@@ -9,25 +9,37 @@ using Unity.Presentation.Utils;
 
 namespace Unity.Presentation.Behaviors
 {
-	/// <summary>
-	/// A helper behavior for various presentation functions.
-	/// </summary>
+	// A helper behavior for various presentation functions.
 	[ExecuteInEditMode]
 	public class PresentationHelper : MonoBehaviour 
 	{
 
+		#region Events
+
+		// Previous slide event.
 		public event EventHandler Previous;
+
+		// Next slide event.
 		public event EventHandler Next;
+
+		// Frame event.
 		public event EventHandler Frame;
 
+		#endregion
+
+		#region Public properties/fields.
+
 		[HideInInspector]
+		// Previous slide key binding.
 		public KeyCode PreviousSlide = KeyCode.LeftArrow;
+
 		[HideInInspector]
+		// Next slide key binding.
 		public KeyCode NextSlide = KeyCode.RightArrow;
 
-		void Awake()
-		{
-		}
+		#endregion
+
+		#region Unity callbacks
 
 		void Update() 
 		{
@@ -67,6 +79,8 @@ namespace Unity.Presentation.Behaviors
 			Next = null;
 			Frame = null;
 		}
+
+		#endregion
 
 	}
 }

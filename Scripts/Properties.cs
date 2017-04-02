@@ -10,16 +10,20 @@ using Unity.Presentation.Utils;
 namespace Unity.Presentation 
 {
 
-	/// <summary>
-	/// Global properties for all presentations.
-	/// </summary>
+	// Global properties for all presentations.
 	public class Properties : ScriptableObject 
 	{
 
+		#region Consts
+
+		// Properties asset name in the project.
 		private const string ASSET_NAME = "Properties.asset";
 
-		private static Properties instance;
+		#endregion
 
+		#region Static properties
+
+		// Returns and creates the singleton instance.
 		public static Properties Instance
 		{
 			get 
@@ -27,6 +31,7 @@ namespace Unity.Presentation
 				if (instance == null)
 				{
 #if UNITY_EDITOR
+					// In the editor try to load the asset from disk.
 					var path = Path.Combine(PresentationUtils.PackageRoot, ASSET_NAME);
 					AssetDatabase.LoadAssetAtPath<Properties>(path);
 #endif
@@ -35,6 +40,7 @@ namespace Unity.Presentation
 					{
 						CreateInstance<Properties>();
 #if UNITY_EDITOR
+						// In the editor save the asset to disk.
 						AssetDatabase.CreateAsset(instance, path);
 #else
 						instance.hideFlags = HideFlags.HideAndDontSave;
@@ -46,9 +52,28 @@ namespace Unity.Presentation
 			}
 		}
 
+		#endregion
+
+		#region Public fields/properties
+
+		// Next slide key binding.
 		public KeyCode NextSlide = KeyCode.RightArrow;
+
+		// Previous slide key binding.
 		public KeyCode PreviousSlide = KeyCode.LeftArrow;
 
+		#endregion
+
+		#region Private variables
+
+		// Singleton instance.
+		private static Properties instance;
+
+		#endregion
+
+		#region Constructor
+
+		// Constructor.
 		protected Properties()
 		{
 			if (instance != null)
@@ -59,6 +84,8 @@ namespace Unity.Presentation
 
 			instance = this;
 		}
+
+		#endregion
 
 	}
 }
