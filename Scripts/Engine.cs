@@ -323,22 +323,8 @@ namespace Unity.Presentation
 		private void fixScenes()
 		{
 #if UNITY_EDITOR
-			var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-			var hash = new HashSet<string>();
-			var count = scenes.Count;
-			for (var i = 0; i < count; i++) hash.Add(scenes[i].path);
-
-			var modified = false;
-			for (var i = 0; i < deck.Slides.Count; i++)
-			{
-				var path = deck.Slides[i].ScenePath;
-				if (string.IsNullOrEmpty(path)) continue;
-				if (hash.Contains(path)) continue;
-				scenes.Add(new EditorBuildSettingsScene(path, true));
-				modified = true;
-			}
-
-			if (modified) EditorBuildSettings.scenes = scenes.ToArray();
+			// Need to fetch all scenes since visibility and play mode can be switched in play mode
+			SceneUtils.UpdateBuildScenes(deck, SlideDeck.PlayModeType.All, SlideDeck.VisibilityType.All);
 #endif
 		}
 

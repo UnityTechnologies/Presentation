@@ -1,9 +1,10 @@
-﻿#if UNITY_EDITOR
-using UnityEditor;
-#endif
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Unity.Presentation 
 {
@@ -13,6 +14,21 @@ namespace Unity.Presentation
 	[CreateAssetMenu(fileName = "Slide Deck", menuName = "Slide Deck")]
 	public class SlideDeck : ScriptableObject 
 	{
+
+		public enum PlayModeType
+		{
+			PlayMode				= 1 << 0,
+			NonPlayMode				= 1 << 1,
+			All						= PlayMode | NonPlayMode
+		}
+
+		public enum VisibilityType
+		{
+			Visible 				= 1 << 0,
+			Invisible 				= 1 << 1,
+			All						= Visible | Invisible
+		}
+
 		public List<PresentationSlide> Slides = new List<PresentationSlide>();
 
 		public bool IsSavedOnDisk
@@ -69,6 +85,29 @@ namespace Unity.Presentation
 			}
 #endif
 		}
+
+		public List<PresentationSlide> GetSlides(PlayModeType playmode, VisibilityType visibility)
+		{
+			if (playmode == PlayModeType.All && visibility == VisibilityType.All) return new List<PresentationSlide>(Slides);
+
+			var list = new List<PresentationSlide>();
+
+			foreach (var slide in Slides)
+			{
+				if (slide.StartInPlayMode)
+					if ((playmode | PlayModeType.PlayMode) != 0) list.Add(slide);
+				else
+					if ((playmode | PlayModeType.NonPlayMode) != 0) list.Add(slide);
+
+				if (slide.Visible)
+					if ((visibility | VisibilityType.Visible) != 0) list.Add(slide);
+				else
+					if ((visibility | VisibilityType.Invisible) != 0) list.Add(slide);
+			}
+
+			return list;
+		}
+
 	}
 
 	/// <summary>
