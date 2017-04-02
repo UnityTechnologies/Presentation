@@ -1,9 +1,11 @@
 using UnityEngine;
-using UnityEditor;
 using System;
-using System.Collections.Generic;
+
+#if UNITY_EDITOR
+using UnityEditor;
 using System.IO;
 using Unity.Presentation.Utils;
+#endif
 
 namespace Unity.Presentation 
 {
@@ -15,9 +17,8 @@ namespace Unity.Presentation
 	{
 
 		private const string ASSET_NAME = "Properties.asset";
-		private const string ASSET_FOLDER = "Assets/Presentation/Editor";
 
-		static Properties instance;
+		private static Properties instance;
 
 		public static Properties Instance
 		{
@@ -25,13 +26,19 @@ namespace Unity.Presentation
 			{
 				if (instance == null)
 				{
+#if UNITY_EDITOR
 					var path = Path.Combine(PresentationUtils.PackageRoot, ASSET_NAME);
-					instance = AssetDatabase.LoadAssetAtPath<Properties>(path);
+					AssetDatabase.LoadAssetAtPath<Properties>(path);
+#endif
 
 					if (instance == null)
 					{
-						instance = CreateInstance<Properties>();
+						CreateInstance<Properties>();
+#if UNITY_EDITOR
 						AssetDatabase.CreateAsset(instance, path);
+#else
+						instance.hideFlags = HideFlags.HideAndDontSave;
+#endif
 					}
 				}
 
@@ -41,6 +48,17 @@ namespace Unity.Presentation
 
 		public KeyCode NextSlide = KeyCode.RightArrow;
 		public KeyCode PreviousSlide = KeyCode.LeftArrow;
+
+		protected Properties()
+		{
+			if (instance != null)
+			{
+				Debug.LogError("Properties already exists. Did you query it in a constructor?");
+				return;
+			}
+
+			instance = this;
+		}
 
 	}
 }
