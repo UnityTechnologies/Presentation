@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Presentation;
+using System.IO;
+using Unity.Presentation.Utils;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,6 +11,15 @@ using UnityEditor;
 
 public static class SceneUtils
 {
+
+	public static string EmptyScenePath
+	{
+		get
+		{
+			return Path.Combine(PresentationUtils.PackageRoot, "Scenes/Empty.unity");
+		}
+	}
+
 #if UNITY_EDITOR
 	public static List<EditorBuildSettingsScene> GetNonDeckScenes(SlideDeck deck)
 	{
@@ -31,6 +42,11 @@ public static class SceneUtils
 
 	public static void UpdateBuildScenes(SlideDeck deck, SlideDeck.PlayModeType playmode, SlideDeck.VisibilityType visibility)
 	{
+		EditorBuildSettings.scenes = GetBuildScenes(deck, playmode, visibility).ToArray();
+	}
+
+	public static List<EditorBuildSettingsScene> GetBuildScenes(SlideDeck deck, SlideDeck.PlayModeType playmode, SlideDeck.VisibilityType visibility)
+	{
 		var nonDeckScenes = SceneUtils.GetNonDeckScenes(deck);
 
 		var slides = deck.GetSlides(playmode, visibility);
@@ -44,8 +60,7 @@ public static class SceneUtils
 		}
 
 		scenes.AddRange(nonDeckScenes);
-
-		EditorBuildSettings.scenes = scenes.ToArray();
+		return scenes;
 	}
 #endif
 }

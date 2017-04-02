@@ -39,8 +39,6 @@ namespace Unity.Presentation
 			LoadingScene
 		}
 
-		private const string PRESENTATION_SCENE = "Scenes/Empty.unity";
-
 		#endregion
 
 		#region Static properties
@@ -343,7 +341,7 @@ namespace Unity.Presentation
 		private void openEmptyScene()
 		{
 			// Need to open an empty scene first because the editor will try to return to the scene from which we started playmode
-			EditorSceneManager.OpenScene(Path.Combine(PresentationUtils.PackageRoot, PRESENTATION_SCENE), OpenSceneMode.Single);
+			EditorSceneManager.OpenScene(SceneUtils.EmptyScenePath, OpenSceneMode.Single);
 		}
 
 		private void createSceneHelper()
