@@ -37,7 +37,7 @@ namespace Unity.Presentation
 			LoadingScene
 		}
 
-		private const string PRESENTATION_SCENE = "Scenes/PresentationLoader.unity";
+		private const string PRESENTATION_SCENE = "Scenes/Empty.unity";
 
 		#endregion
 
