@@ -39,10 +39,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Unity.Presentation.Behaviors;
-using Unity.Presentation.Utils;
 
 #if UNITY_EDITOR
 using UnityEditor;

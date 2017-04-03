@@ -1,10 +1,4 @@
-﻿/*
- * @author Valentin Simonov / http://va.lent.in/
- */
-
-using UnityEngine;
-using UnityEditor;
-using System.Reflection;
+﻿using UnityEngine;
 
 namespace Unity.Presentation.Utils
 {

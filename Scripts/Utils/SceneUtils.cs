@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Unity.Presentation;
 using System.IO;
 using Unity.Presentation.Utils;

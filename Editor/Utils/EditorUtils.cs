@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using Unity.Presentation.Behaviors;
@@ -33,7 +31,18 @@ namespace Unity.Presentation.Utils
 
 			try 
 			{
-				BuildPipeline.BuildPlayer(scenes.ToArray(), Path.Combine(path, "Presentation"), EditorUserBuildSettings.activeBuildTarget, options);
+                string name;
+                switch (EditorUserBuildSettings.activeBuildTarget)
+                {
+                    case BuildTarget.StandaloneWindows:
+                    case BuildTarget.StandaloneWindows64:
+                        name = "Presentation.exe";
+                        break;
+                    default:
+                        name = "Presentation";
+                        break;
+                }
+                BuildPipeline.BuildPlayer(scenes.ToArray(), Path.Combine(path, name), EditorUserBuildSettings.activeBuildTarget, options);
 			} catch (Exception e)
 			{
 				Debug.Log(e.Message);
