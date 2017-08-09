@@ -7,30 +7,32 @@ using System.IO;
 
 namespace Unity.Presentation.Utils
 {
+    /// <summary>
+    /// Editor-only utility methods.
+    /// </summary>
+    public static class EditorUtils
+    {
+        /// <summary>
+        /// Builds presentation deck as a standalone application.
+        /// </summary>
+        /// <param name="deck">Slide Deck to build.</param>
+        public static void BuildPresentation(SlideDeck deck)
+        {
+            string path = EditorUtility.SaveFolderPanel("Choose Location of the Presentation build", "", "");
+            if (string.IsNullOrEmpty(path)) return;
 
-	// Editor-only utility methods.
-	public static class EditorUtils
-	{
+            updateLoaderScene(deck);
+            deck.PrepareSlidesForBuild();
 
-		// Builds presentation deck as a standalone application.
-		// SlideDeck deck -- Slide deck to use for the standalone application.
-		public static void BuildPresentation(SlideDeck deck)
-		{
-			string path = EditorUtility.SaveFolderPanel("Choose Location of the Presentation build", "", "");
-			if (string.IsNullOrEmpty(path)) return;
+            var scenes = SceneUtils.GetBuildScenes(deck, SlideDeck.PlayModeType.PlayMode, SlideDeck.VisibilityType.Visible);
+            scenes.Insert(0, new EditorBuildSettingsScene(SceneUtils.LoaderScenePath, true));
 
-			updateLoaderScene(deck);
-			deck.PrepareSlidesForBuild();
+            var options = BuildOptions.ShowBuiltPlayer;
+            if (EditorUserBuildSettings.development) options |= BuildOptions.Development;
+            if (EditorUserBuildSettings.connectProfiler) options |= BuildOptions.ConnectWithProfiler;
 
-			var scenes = SceneUtils.GetBuildScenes(deck, SlideDeck.PlayModeType.PlayMode, SlideDeck.VisibilityType.Visible);
-			scenes.Insert(0, new EditorBuildSettingsScene(SceneUtils.LoaderScenePath, true));
-
-			var options = BuildOptions.ShowBuiltPlayer;
-			if (EditorUserBuildSettings.development) options |= BuildOptions.Development;
-			if (EditorUserBuildSettings.connectProfiler) options |= BuildOptions.ConnectWithProfiler;
-
-			try 
-			{
+            try
+            {
                 string name;
                 switch (EditorUserBuildSettings.activeBuildTarget)
                 {
@@ -43,39 +45,41 @@ namespace Unity.Presentation.Utils
                         break;
                 }
                 BuildPipeline.BuildPlayer(scenes.ToArray(), Path.Combine(path, name), EditorUserBuildSettings.activeBuildTarget, options);
-			} catch (Exception e)
-			{
-				Debug.Log(e.Message);
-			}
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+        }
 
-		}
+        /// <summary>
+        /// Updates Loader scene parameters to run the deck on start.
+        /// </summary>
+        /// <param name="deck">Slide Deck to use.</param>
+        private static void updateLoaderScene(SlideDeck deck)
+        {
+            var sceneSetup = EditorSceneManager.GetSceneManagerSetup();
+            var scene = EditorSceneManager.OpenScene(SceneUtils.LoaderScenePath, OpenSceneMode.Single);
+            var loader = GameObject.FindObjectOfType<Loader>() as Loader;
+            if (loader == null)
+            {
+                Debug.LogError("Failed to update Loader scene. Can't find Loader script");
+                return;
+            }
 
-		// Updates Loader scene parameters to run the deck on start.
-		// SlideDeck deck -- Slide deck to use for the standalone application.  
-		private static void updateLoaderScene(SlideDeck deck)
-		{
-			var sceneSetup = EditorSceneManager.GetSceneManagerSetup();
-			var scene = EditorSceneManager.OpenScene(SceneUtils.LoaderScenePath, OpenSceneMode.Single);
-			var loader = GameObject.FindObjectOfType<Loader>() as Loader;
-			if (loader == null)
-			{
-				Debug.LogError("Failed to update Loader scene. Can't find Loader script");
-				return;
-			}
+            var so = new SerializedObject(loader);
+            so.Update();
 
-			var so = new SerializedObject(loader);
-			so.Update();
+            // Set properties.
+            var prop = so.FindProperty("Properties");
+            prop.objectReferenceValue = Properties.Instance;
+            var d = so.FindProperty("Deck");
+            d.objectReferenceValue = deck;
 
-			// Set properties.
-			var prop = so.FindProperty("Properties");
-			prop.objectReferenceValue = Properties.Instance;
-			var d = so.FindProperty("Deck");
-			d.objectReferenceValue = deck;
+            so.ApplyModifiedProperties();
 
-			so.ApplyModifiedProperties();
-
-			EditorSceneManager.SaveScene(scene);
-			EditorSceneManager.RestoreSceneManagerSetup(sceneSetup);
-		}
-	}
+            EditorSceneManager.SaveScene(scene);
+            EditorSceneManager.RestoreSceneManagerSetup(sceneSetup);
+        }
+    }
 }

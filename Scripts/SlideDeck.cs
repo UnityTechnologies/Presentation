@@ -7,225 +7,211 @@ using UnityEngine.Serialization;
 using UnityEditor;
 #endif
 
-namespace Unity.Presentation 
+namespace Unity.Presentation
 {
-	// Presentation asset.
-	[CreateAssetMenu(fileName = "Slide Deck", menuName = "Slide Deck")]
-	public class SlideDeck : ScriptableObject 
-	{
+    /// <summary>
+    /// Presentation asset.
+    /// </summary>
+    [CreateAssetMenu(fileName = "Slide Deck", menuName = "Slide Deck")]
+    public class SlideDeck : ScriptableObject
+    {
+#region Consts
 
-		#region Consts
+        /// <summary>
+        /// Play Mode filter for GetSlides.
+        /// </summary>
+        [Flags]
+        public enum PlayModeType
+        {
+            /// <summary>
+            /// Slides which work in Play Mode.
+            /// </summary>
+            PlayMode = 1 << 0,
 
-		// Play Mode filter for GetSlides.
-		public enum PlayModeType
-		{
-			// Slides which work in Play Mode.
-			PlayMode				= 1 << 0,
+            /// <summary>
+            /// Slides which work outside of Play Mode.
+            /// </summary>
+            NonPlayMode = 1 << 1,
 
-			// Slides which work outside of Play Mode.
-			NonPlayMode				= 1 << 1,
+            /// <summary>
+            /// All slides.
+            /// </summary>
+            All = PlayMode | NonPlayMode
+        }
 
-			// All slides.
-			All						= PlayMode | NonPlayMode
-		}
+        /// <summary>
+        /// Visibility filter for GetSlides.
+        /// </summary>
+        [Flags]
+        public enum VisibilityType
+        {
+            /// <summary>
+            /// Visible slides.
+            /// </summary>
+            Visible = 1 << 0,
 
-		// Visibility filter for GetSlides.
-		public enum VisibilityType
-		{
-			// Visible slides.
-			Visible 				= 1 << 0,
+            /// <summary>
+            /// Hidden slides.
+            /// </summary>
+            Hidden = 1 << 1,
 
-			// Hidden slides.
-			Hidden 					= 1 << 1,
+            /// <summary>
+            /// All slides.
+            /// </summary>
+            All = Visible | Hidden
+        }
 
-			// All slides.
-			All						= Visible | Hidden
-		}
+#endregion
 
-		#endregion
+#region Public fields
 
-		#region Public fields/properties
+        /// <summary>
+        /// The list of slides.
+        /// </summary>
+        public List<PresentationSlide> Slides
+        {
+            get { return new List<PresentationSlide>(slides); }
+        }
 
-		// The list of slides.
-		public List<PresentationSlide> Slides 
-		{
-			get { return slides; }
-		}
+        /// <summary>
+        /// Slides background color
+        /// </summary>
+        public Color BackgroundColor
+        {
+            get { return backgroundColor; }
+            set { backgroundColor = value; }
+        }
 
-		// Slides background color
-		public Color BackgroundColor
-		{
-			get { return backgroundColor; }
-			set { backgroundColor = value; }
-		}
-
-		// Indicates if the slide deck is saved to disk.
-		public bool IsSavedOnDisk
-		{
-			get
-			{
+        /// <summary>
+        /// Indicates if the slide deck is saved to disk.
+        /// </summary>
+        public bool IsSavedOnDisk
+        {
+            get
+            {
 #if UNITY_EDITOR
-				return !string.IsNullOrEmpty(Path);
+                return !string.IsNullOrEmpty(Path);
 #else
 				return true;
 #endif
-			}
-		}
+            }
+        }
 
-		// Returns this slide deck asset path.
-		public string Path
-		{
-			get
-			{
+        /// <summary>
+        /// Slide deck asset path.
+        /// </summary>
+        public string Path
+        {
+            get
+            {
 #if UNITY_EDITOR
-				return AssetDatabase.GetAssetPath(this);
+                return AssetDatabase.GetAssetPath(this);
 #else
 				return null;
 #endif
-			}
-		}
+            }
+        }
 
-		// Returns this slide asset name.
-		public string Name
-		{
-			get
-			{
-				return name;
-			}
-		}
+        /// <summary>
+        /// Slide asset name.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
 
-		#endregion
+#endregion
 
-		#region Private variables
+#region Private variables
 
-		[SerializeField]
-		[FormerlySerializedAs("Slides")]
-		public List<PresentationSlide> slides = new List<PresentationSlide>();
+        [SerializeField]
+        [FormerlySerializedAs("Slides")]
+        private List<PresentationSlide> slides = new List<PresentationSlide>();
 
-		[SerializeField]
-		private Color backgroundColor = Color.black;
+        [SerializeField]
+        private Color backgroundColor = Color.black;
 
-		#endregion
+#endregion
 
-		#region Public methods
-
-#if UNITY_EDITOR
-		// Saves the slide deck to an asset on disk.
-		// bool createAssetIfNeeded -- Should the asset file be created if this asset hasn't been saved yet.
-		public void Save(bool createAssetIfNeeded = false)
-		{
-			if (IsSavedOnDisk)
-			{
-				EditorUtility.SetDirty(this);
-				AssetDatabase.SaveAssets();
-			}
-			else
-			{
-				if (createAssetIfNeeded)
-				{
-					var path = EditorUtility.SaveFilePanelInProject("Save Slide Deck", "Presentation.asset", "asset", "");
-					if (string.IsNullOrEmpty(path)) return;
-
-					this.hideFlags = HideFlags.None;
-					AssetDatabase.CreateAsset(this, path);
-					AssetDatabase.SaveAssets();
-				}
-			}
-		}
-
-		// Prepares slides for a standalone build.
-		public void PrepareSlidesForBuild()
-		{
-			foreach (var slide in Slides)
-			{
-				slide.PrepareForBuild();
-			}
-		}
-#endif
-
-		// Returns a list of slides based on filters.
-		// PlayModeType playmode -- Play Mode filter.
-		// VisibilityType visibility -- Visibility filter.
-		public List<PresentationSlide> GetSlides(PlayModeType playmode, VisibilityType visibility)
-		{
-			if (playmode == PlayModeType.All && visibility == VisibilityType.All) return new List<PresentationSlide>(Slides);
-
-			var list = new List<PresentationSlide>();
-
-			foreach (var slide in Slides)
-			{
-				if (slide.StartInPlayMode)
-				{
-					if ((playmode & PlayModeType.PlayMode) == 0) continue;
-				}
-				else
-				{
-					if ((playmode & PlayModeType.NonPlayMode) == 0) continue;
-				}
-
-				if (slide.Visible)
-				{
-					if ((visibility & VisibilityType.Visible) == 0) continue;
-				}
-				else
-				{
-					if ((visibility & VisibilityType.Hidden) == 0) continue;
-				}
-
-				list.Add(slide);
-			}
-
-			return list;
-		}
-
-		#endregion
-
-	}
-
-	#region Slide
-
-	// Presentation slide.
-	[Serializable]
-	public class PresentationSlide
-	{
-
-		// Slide scene path.
-		public string ScenePath
-		{
-			get 
-			{
-#if UNITY_EDITOR
-				return AssetDatabase.GetAssetPath(Scene);
-#else
-				return scenePath;
-#endif
-			}
-		}
+#region Public methods
 
 #if UNITY_EDITOR
-		// Prepares the slide for standalone build.
-		public void PrepareForBuild()
-		{
-			scenePath = ScenePath;
-		}
+        /// <summary>
+        /// Saves the slide deck to an asset on disk.
+        /// </summary>
+        /// <param name="createAssetIfNeeded">Should the asset file be created if this asset hasn't been saved yet.</param>
+        public void Save(bool createAssetIfNeeded = false)
+        {
+            if (IsSavedOnDisk)
+            {
+                EditorUtility.SetDirty(this);
+                AssetDatabase.SaveAssets();
+            }
+            else
+            {
+                if (createAssetIfNeeded)
+                {
+                    var path = EditorUtility.SaveFilePanelInProject("Save Slide Deck", "Presentation.asset", "asset", "");
+                    if (string.IsNullOrEmpty(path)) return;
 
-		// Scene asset in the editor.
-		public SceneAsset Scene;
+                    this.hideFlags = HideFlags.None;
+                    AssetDatabase.CreateAsset(this, path);
+                    AssetDatabase.SaveAssets();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Prepares slides for a standalone build.
+        /// </summary>
+        public void PrepareSlidesForBuild()
+        {
+            foreach (var slide in Slides) slide.PrepareForBuild();
+        }
 #endif
 
-#pragma warning disable 414
-		[SerializeField]
-		// Scene path in the player.
-		private string scenePath;
-#pragma warning restore 414
+        /// <summary>
+        /// Returns a list of slides based on filters.
+        /// </summary>
+        /// <param name="playmode">Play Mode filter.</param>
+        /// <param name="visibility">Visibility filter.</param>
+        /// <returns>A list of filtered slides.</returns>
+        public List<PresentationSlide> GetSlides(PlayModeType playmode, VisibilityType visibility)
+        {
+            if (playmode == PlayModeType.All && visibility == VisibilityType.All) return Slides;
 
-		// Idicates if this slide is visible or hidden.
-		public bool Visible = true;
+            var list = new List<PresentationSlide>(slides.Count);
 
-		// Indicates if this slide starts in Play Mode.
-		public bool StartInPlayMode = true;
-	}
+            foreach (var slide in Slides)
+            {
+                if (slide.StartInPlayMode)
+                {
+                    if ((playmode & PlayModeType.PlayMode) == 0) continue;
+                }
+                else
+                {
+                    if ((playmode & PlayModeType.NonPlayMode) == 0) continue;
+                }
 
-	#endregion
+                if (slide.Visible)
+                {
+                    if ((visibility & VisibilityType.Visible) == 0) continue;
+                }
+                else
+                {
+                    if ((visibility & VisibilityType.Hidden) == 0) continue;
+                }
 
+                list.Add(slide);
+            }
+
+            return list;
+        }
+
+#endregion
+
+    }
 }

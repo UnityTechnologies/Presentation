@@ -6,85 +6,92 @@ using System.IO;
 using Unity.Presentation.Utils;
 #endif
 
-namespace Unity.Presentation 
+namespace Unity.Presentation
 {
+    /// <summary>
+    /// Global properties for all presentations.
+    /// </summary>
+    public class Properties : ScriptableObject
+    {
 
-	// Global properties for all presentations.
-	public class Properties : ScriptableObject 
-	{
+#region Consts
 
-		#region Consts
+        private const string ASSET_NAME = "Properties.asset";
 
-		// Properties asset name in the project.
-		private const string ASSET_NAME = "Properties.asset";
+#endregion
 
-		#endregion
+#region Static properties
 
-		#region Static properties
-
-		// Returns and creates the singleton instance.
-		public static Properties Instance
-		{
-			get 
-			{
-				if (instance == null)
-				{
+        /// <summary>
+        /// Properties singleton instance.
+        /// </summary>
+        public static Properties Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
 #if UNITY_EDITOR
-					// In the editor try to load the asset from disk.
-					var path = Path.Combine(PresentationUtils.PackageRoot, ASSET_NAME);
-					AssetDatabase.LoadAssetAtPath<Properties>(path);
+                    // In the editor try to load the asset from disk.
+                    var path = Path.Combine(PresentationUtils.PackageRoot, ASSET_NAME);
+                    AssetDatabase.LoadAssetAtPath<Properties>(path);
 #endif
 
-					if (instance == null)
-					{
-						CreateInstance<Properties>();
+                    if (instance == null)
+                    {
+                        CreateInstance<Properties>();
 #if UNITY_EDITOR
-						// In the editor save the asset to disk.
-						AssetDatabase.CreateAsset(instance, path);
+                        // In the editor save the asset to disk.
+                        AssetDatabase.CreateAsset(instance, path);
 #else
 						instance.hideFlags = HideFlags.HideAndDontSave;
 #endif
-					}
-				}
+                    }
+                }
+                return instance;
+            }
+        }
 
-				return instance;
-			}
-		}
+#endregion
 
-		#endregion
+#region Public fields/properties
 
-		#region Public fields/properties
+        /// <summary>
+        /// Next slide key binding.
+        /// </summary>
+        public KeyCode NextSlide = KeyCode.RightArrow;
 
-		// Next slide key binding.
-		public KeyCode NextSlide = KeyCode.RightArrow;
+        /// <summary>
+        /// Previous slide key binding.
+        /// </summary>
+        public KeyCode PreviousSlide = KeyCode.LeftArrow;
 
-		// Previous slide key binding.
-		public KeyCode PreviousSlide = KeyCode.LeftArrow;
+#endregion
 
-		#endregion
+#region Private variables
 
-		#region Private variables
+        // Singleton instance.
+        private static Properties instance;
 
-		// Singleton instance.
-		private static Properties instance;
+#endregion
 
-		#endregion
+#region Constructor
 
-		#region Constructor
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        protected Properties()
+        {
+            if (instance != null)
+            {
+                Debug.LogError("Properties already exists. Did you query it in a constructor?");
+                return;
+            }
 
-		// Constructor.
-		protected Properties()
-		{
-			if (instance != null)
-			{
-				Debug.LogError("Properties already exists. Did you query it in a constructor?");
-				return;
-			}
+            instance = this;
+        }
 
-			instance = this;
-		}
+#endregion
 
-		#endregion
-
-	}
+    }
 }

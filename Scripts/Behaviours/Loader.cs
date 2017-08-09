@@ -2,17 +2,25 @@
 
 namespace Unity.Presentation.Behaviors
 {
+    /// <summary>
+    /// This component starts the engine in standalone presentation.
+    /// </summary>
+    public class Loader : MonoBehaviour
+    {
+        /// <summary>
+        /// Link to Properties asset.
+        /// </summary>
+        public Properties Properties;
 
-	// A script for standalone presentation which starts the engine.
-	public class Loader : MonoBehaviour 
-	{
-		public Properties Properties;
-		public SlideDeck Deck;
+        /// <summary>
+        /// Link to Slide Deck asset.
+        /// </summary>
+        public SlideDeck Deck;
 
-		private void Start()
-		{
-			Engine.Instance.LoadDeck(Deck);
-			Engine.Instance.StartPresentation();
-		}
-	}
+        private void Start()
+        {
+            Engine.Instance.LoadDeck(Deck);
+            Engine.Instance.StartPresentation();
+        }
+    }
 }
