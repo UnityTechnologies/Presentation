@@ -83,7 +83,7 @@ namespace Unity.Presentation.Inspectors
             if (styles == null) styles = new Styles();
 
             ReorderableList list;
-            var key = deck.Path + "#" + (shouldSelect != null) + "#" + (onPlayPress != null);
+            var key = deck.GetInstanceID() + "#" + (shouldSelect != null) + "#" + (onPlayPress != null);
             if (!lists.TryGetValue(key, out list))
             {
                 // Init a ReorderableList for the deck and cache it.

@@ -70,7 +70,7 @@ namespace Unity.Presentation
         /// </summary>
         public List<PresentationSlide> Slides
         {
-            get { return new List<PresentationSlide>(slides); }
+            get { return slides; }
         }
 
         /// <summary>

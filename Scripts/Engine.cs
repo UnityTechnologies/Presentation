@@ -279,8 +279,7 @@ namespace Unity.Presentation
         public void StartPresentation(int slide = 0)
         {
 #if UNITY_EDITOR
-            EditorApplication.update += updateHandler;
-            EditorApplication.playmodeStateChanged += playmodeChangeHandler;
+            subscribeToEvents();
 
             // Exit Play mode first
             if (EditorApplication.isPlaying)
@@ -309,7 +308,7 @@ namespace Unity.Presentation
             else
             {
                 destroySceneHelper();
-                clearPresentationState();
+                unsubscribeFromEvents();
                 restoreEditorState();
             }
 #endif
@@ -361,11 +360,7 @@ namespace Unity.Presentation
                 cam.transform.Translate(-0.1f, 0, 0);
             });
 
-            if (isPresenting)
-            {
-                EditorApplication.update += updateHandler;
-                EditorApplication.playmodeStateChanged += playmodeChangeHandler;
-            }
+            if (isPresenting) subscribeToEvents();
 #endif
         }
 
@@ -548,9 +543,18 @@ namespace Unity.Presentation
         }
 
         /// <summary>
+        /// Subscribes to editor events.
+        /// </summary>
+        private void subscribeToEvents()
+        {
+            EditorApplication.playmodeStateChanged += playmodeChangeHandler;
+            EditorApplication.update += updateHandler;
+        }
+
+        /// <summary>
         /// Clears callbacks when stopping the presentation
         /// </summary>
-        private void clearPresentationState()
+        private void unsubscribeFromEvents()
         {
             EditorApplication.playmodeStateChanged -= playmodeChangeHandler;
             EditorApplication.update -= updateHandler;
@@ -634,7 +638,7 @@ namespace Unity.Presentation
                     case PlayModeChange.ExitBeforeStop:
 					// We are stopping the presentation and need to leave Play Mode.
                         restoreEditorState();
-                        clearPresentationState();
+                        unsubscribeFromEvents();
                         break;
                     case PlayModeChange.User:
 					// User clicked Play button to exit Play Mode.
