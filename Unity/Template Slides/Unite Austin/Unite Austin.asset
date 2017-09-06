@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20d36f140d93042978901db40338cdc8, type: 3}
+  m_Name: Unite Austin
+  m_EditorClassIdentifier: 
+  slides:
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: b553c1ef935b641829cfd907048bd9aa, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 660fbda52928f4400a8fb289294c1a69, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: ca851e0a0a9d2438c8ddef6418446ec8, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: e9ca15c20f03442f1a88f4976315c238, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 621000204fce34456aae49fa2408856b, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: c387bc4a7c69843708e9cd7a9e388d17, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 388bdcb976a844ba19cffa0527adeaac, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 72e0b97e4f7d84b478515c57617475ff, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 3180300f34c6d4b75983499ccb11ead5, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: 0b47bb53683b54e4c89324dfe68326e9, type: 3}
+    scenePath: 
+  - Visible: 1
+    StartInPlayMode: 1
+    Scene: {fileID: 102900000, guid: fc773ea8a12c3461489522b384ef8dfc, type: 3}
+    scenePath: 
+  backgroundColor: {r: 0.23529412, g: 0.13333334, b: 0.37254903, a: 1}
