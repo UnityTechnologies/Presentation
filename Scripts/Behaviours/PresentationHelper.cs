@@ -4,6 +4,7 @@ using System;
 #if UNITY_EDITOR
 using UnityEditor;
 using Unity.Presentation.Utils;
+using Unity.Presentation.EditorOnly;
 #endif
 
 namespace Unity.Presentation.Behaviors
@@ -49,39 +50,83 @@ namespace Unity.Presentation.Behaviors
 
 #endregion
 
+#region Private variables
+
+#if UNITY_EDITOR
+        private GameView gameView;
+#endif
+
+#endregion
+
 #region Unity callbacks
+
+        private void OnEnable()
+        {
+#if UNITY_EDITOR
+            gameView = GameView.Instance;
+#endif
+        }
 
         private void Update()
         {
             if (Frame != null) Frame(this, EventArgs.Empty);
 
-            if (Input.GetKeyUp(PreviousSlide) && Previous != null) Previous(this, EventArgs.Empty);
-            else if (Input.GetKeyUp(NextSlide) && Next != null) Next(this, EventArgs.Empty);
-            else if (Input.GetKeyUp(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift))
-            {
-#if UNITY_EDITOR
-                InternalHelper.ToggleGameViewSize();
-#endif
-            } 
-#if !UNITY_EDITOR
-			else if (Input.GetKeyUp(KeyCode.Escape))
-			{
-				Application.Quit();
-			}
-#endif
+            keyHandled = false;
         }
 			
-#if UNITY_EDITOR
+        // Getting double EventType.KeyUp events in Standalone Player.
+        // This hack is here to make sure that we handle it only once.
+        private bool keyHandled = false;
+
         private void OnGUI()
         {
-            if (Application.isPlaying) return;
-            if (Event.current.type == EventType.KeyUp)
+            if (Event.current.type == EventType.KeyUp && !keyHandled)
             {
-                if (Event.current.keyCode == PreviousSlide && Previous != null) Previous(this, EventArgs.Empty);
-                else if (Event.current.keyCode == NextSlide && Next != null) Next(this, EventArgs.Empty);
+                keyHandled = true;
+                if (Event.current.keyCode == PreviousSlide && Previous != null) 
+                {
+                    Debug.Log(Time.time + " PREVIOUS " + GetInstanceID());
+                    Event.current.Use();
+                    Previous(this, EventArgs.Empty);
+                }
+                else if (Event.current.keyCode == NextSlide && Next != null) 
+                {
+                    Debug.Log(Time.time + " NEXT " + GetInstanceID());
+                    Event.current.Use();
+                    Next(this, EventArgs.Empty);
+                }
+                else if (Event.current.keyCode == KeyCode.Space && Event.current.shift)
+                {
+#if UNITY_EDITOR
+                    if (Application.isPlaying)
+                    {
+                        if (gameView.IsMaximized || gameView.IsFullscreen)
+                            gameView.SetNormal();
+                        else
+                        {
+                            if (Event.current.control || Event.current.command)
+                                gameView.SetFullscreen();
+                            else
+                                gameView.SetMaximized();
+                        }
+                    }
+                    else
+                    {
+                        if (gameView.IsFullscreen)
+                            gameView.SetNormal();
+                        else if (Event.current.control || Event.current.command)
+                            gameView.SetFullscreen();
+                    }
+#endif
+                } 
+#if !UNITY_EDITOR
+                else if (Event.current.keyCode == KeyCode.Escape)
+                {
+                    Application.Quit();
+                }
+#endif
             }
         }
-#endif
 
         private void OnDestroy()
         {

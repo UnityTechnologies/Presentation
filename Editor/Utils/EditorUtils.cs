@@ -30,6 +30,7 @@ namespace Unity.Presentation.Utils
             var options = BuildOptions.ShowBuiltPlayer;
             if (EditorUserBuildSettings.development) options |= BuildOptions.Development;
             if (EditorUserBuildSettings.connectProfiler) options |= BuildOptions.ConnectWithProfiler;
+            if (EditorUserBuildSettings.allowDebugging) options |= BuildOptions.AllowDebugging;
 
             try
             {

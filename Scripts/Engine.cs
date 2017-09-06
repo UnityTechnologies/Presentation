@@ -46,6 +46,7 @@ using Unity.Presentation.Utils;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using Unity.Presentation.EditorOnly;
 #endif
 
 namespace Unity.Presentation
@@ -618,10 +619,16 @@ namespace Unity.Presentation
         /// </summary>
         private void playmodeChangeHandler()
         {
-            if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
+            if (EditorApplication.isPaused)
+            {
+                // User paused the game
+                GameView.Instance.SetNormal();
+            }
+            else if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 // Went out of Play Mode
                 destroySceneHelper();
+                GameView.Instance.SetNormal();
 
                 switch (playModeChangeReason)
                 {
