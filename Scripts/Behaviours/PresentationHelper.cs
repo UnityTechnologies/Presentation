@@ -85,13 +85,11 @@ namespace Unity.Presentation.Behaviors
                 keyHandled = true;
                 if (Event.current.keyCode == PreviousSlide && Previous != null) 
                 {
-                    Debug.Log(Time.time + " PREVIOUS " + GetInstanceID());
                     Event.current.Use();
                     Previous(this, EventArgs.Empty);
                 }
                 else if (Event.current.keyCode == NextSlide && Next != null) 
                 {
-                    Debug.Log(Time.time + " NEXT " + GetInstanceID());
                     Event.current.Use();
                     Next(this, EventArgs.Empty);
                 }
