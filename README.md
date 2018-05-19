@@ -18,6 +18,7 @@ This project allows you to build a full presentation in Unity and never leave it
 1. Use Unity UI to design slides.
 1. Make interactive slides (there are examples in the sample presentation).
 1. Even load whole games as slides!
+1. Export slides to .png files
 1. ... and more!
 
 ## Getting started
@@ -55,7 +56,6 @@ If you check the demo Slide Deck you will see that slide scenes all have the sam
 
 ## TODO
 1. Proper fullscreen.
-1. Some way to export slides to more common formats (PNGs, PDF, PPT) when one is unable to run Unity during a presentation.
 1. Better slide list interface.
 
 ## Known issues
