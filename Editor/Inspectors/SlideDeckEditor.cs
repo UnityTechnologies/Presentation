@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using System;
 using Unity.Presentation.Utils;
+using UnityEditor.Callbacks;
 
 namespace Unity.Presentation.Inspectors
 {
@@ -220,9 +221,25 @@ namespace Unity.Presentation.Inspectors
             if (GUILayout.Button("Load This Slide Deck"))
             {
                 Engine.Instance.LoadDeck(instance);
+                EditorWindow.GetWindow<PresentationWindow>();
             }
 
             scroll = DrawInspector(instance, scroll);
+        }
+
+        [OnOpenAsset(1)]
+        public static bool step1(int instanceID, int line)
+        {
+            SlideDeck deck = EditorUtility.InstanceIDToObject(instanceID) as SlideDeck;
+
+            if (deck)
+            {
+                Engine.Instance.LoadDeck(deck);
+                EditorWindow.GetWindow<PresentationWindow>();
+                return true;
+            }
+
+            return false;
         }
 
 #endregion

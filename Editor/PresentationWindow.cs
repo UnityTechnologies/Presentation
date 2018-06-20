@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
-using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
-using System;
+using System.IO;
 using Unity.Presentation.Inspectors;
 using Unity.Presentation.Utils;
 
@@ -35,6 +33,7 @@ namespace Unity.Presentation
             public readonly GUIContent TEXT_LOAD = new GUIContent("Load", "Load Presentation from disk");
             public readonly GUIContent TEXT_SAVE = new GUIContent("Save", "Save Presentation to disk");
             public readonly GUIContent TEXT_BUILD = new GUIContent("Build", "Build Standalone Presentation for selected platform");
+            public readonly GUIContent TEXT_EXPORT = new GUIContent("Exprt", "Export all slides to png image files");
             public readonly GUIContent TEXT_PREV = new GUIContent("<<", "Go to the previous slide");
             public readonly GUIContent TEXT_FROM_BEGINNING = new GUIContent("> B", "Start Presentation from the first slide");
             public readonly GUIContent TEXT_STOP = new GUIContent("Stop", "Stop Presentation");
@@ -154,6 +153,7 @@ namespace Unity.Presentation
             else
             {
                 var shouldBuild = false;
+                var shouldExport = false;
                 var bgcolor = GUI.backgroundColor;
                 var deck = engine.SlideDeck;
 
@@ -174,6 +174,10 @@ namespace Unity.Presentation
                 if (GUILayout.Button(styles.TEXT_BUILD, styles.BUTTON))
                 {
                     shouldBuild = true;
+                }
+                if (GUILayout.Button(styles.TEXT_EXPORT, styles.BUTTON))
+                {
+                    shouldExport = true;
                 }
                 GUI.enabled = true;
 
@@ -214,6 +218,50 @@ namespace Unity.Presentation
                 if (shouldBuild)
                 {
                     EditorUtils.BuildPresentation(deck);
+                }
+
+                if (shouldExport)
+                {
+                    EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                    var activeScene = SceneManager.GetActiveScene().path;
+
+                    string exportFolder =
+                        EditorUtility.OpenFolderPanel("Choose folder for export", Application.dataPath, "Exports");
+
+                    if (!string.IsNullOrEmpty(exportFolder))
+                    {
+                        RenderTexture renderTexture = RenderTexture.GetTemporary(1920, 1080, 32, RenderTextureFormat.ARGB32);
+
+                        for (var i = 0; i < deck.Slides.Count; i++)
+                        {
+                            var slide = deck.Slides[i];
+                            EditorSceneManager.OpenScene(slide.ScenePath);
+
+                            var sceneCam = Camera.main;
+                            sceneCam.targetTexture = renderTexture;
+
+                            RenderTexture.active = renderTexture;
+                            sceneCam.Render();
+
+                            var exportTexture = new Texture2D(renderTexture.width, renderTexture.height);
+                            exportTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+
+                            var slidePath =
+                                string.Format("{0}/{1} - {2}.png", exportFolder, i + 1,
+                                    Path.GetFileNameWithoutExtension(slide.ScenePath));
+
+                            File.WriteAllBytes(slidePath,
+                                exportTexture.EncodeToPNG());
+
+                            RenderTexture.active = null;
+                            Object.DestroyImmediate(exportTexture);
+                        }
+
+                        RenderTexture.ReleaseTemporary(renderTexture);
+
+                        if(!string.IsNullOrEmpty(activeScene))
+                            EditorSceneManager.OpenScene(activeScene);
+                    }
                 }
             }
         }
